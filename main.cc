@@ -29,6 +29,8 @@ int main(int argc, char* argv[]) {
 	
 	control.setModel(&model);
 	model.addView(&view);
+
+	view.notify(&model); // initial notification to trigger draw
 	
 	while(!model.hasQuitSignal()) {
 		control.handleKeystroke(getch());

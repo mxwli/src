@@ -1,6 +1,13 @@
 #ifndef KEYBOARDCONT_H
 #define KEYBOARDCONT_H
 
+#define KEY_ESC 27
+#define CTRLB 2
+#define CTRLD 4
+#define CTRLF 6
+#define CTRLG 7
+#define CTRLU 21
+
 class AutomatonNode;
 class KeyboardController;
 
@@ -11,6 +18,7 @@ class KeyboardController;
 #include "mvcabstract.h"
 #include "textoperation.h"
 #include "texteditor.h"
+#include "ncurses.h"
 
 class AutomatonNode {
 	struct AutomatonEdge {
@@ -46,6 +54,19 @@ public:
 	}
 };
 
+// this is just included to make sure no funny business with weird special keys occurs
+class ValidKeyChecker {
+	bool validArr[512];
+	public:
+	ValidKeyChecker() {
+		validArr[KEY_BACKSPACE] = validArr[KEY_DC] = validArr[KEY_ESC] = 1;
+		for(int i = 32; i <= 126; i++) validArr[i] = 1;
+		validArr['\t'] = validArr['\n'] = 1;
+		validArr[CTRLB] = validArr[CTRLD] = validArr[CTRLF] = validArr[CTRLG] = validArr[CTRLU] = 1;
+	}
+	bool isValid(int c) const {return c < 512 && c >= 0 && validArr[c];}
+};
+
 class KeyboardController : public Controller {
 	std::vector<AutomatonNode> automaton;
 	AutomatonNode* current;
@@ -54,10 +75,11 @@ class KeyboardController : public Controller {
 	// scans the buffer for a count and return the count value
 	// additionally removes the count from the buffer
 	bool isRecording;
-	static const int KEY_ESC = 27;
+	ValidKeyChecker validator;
 public:
 	KeyboardController();
 	void handleKeystroke(int keystroke) {
+		if(!validator.isValid(keystroke)) return;
 		buffer.push_back(keystroke);
 		current = current->transitionTo(this, keystroke);
 	}
@@ -164,7 +186,7 @@ private:
 	void endCopyDeleteInsertMotion(); // im very good at naming
 
 	void join();
-	
+
 	void pasteBefore();
 	void pasteAfter();
 

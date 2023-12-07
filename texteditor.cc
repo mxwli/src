@@ -88,6 +88,14 @@ Cursor TextEditor::getPreviousWord() {
 	}
 	return cur;
 }
+std::string TextEditor::getIndentation(int line) {
+	std::string ret = "";
+	for(char c: (*constBase)[line]) {
+		if(c == '\t' || c == ' ') ret.push_back(c);
+		else return ret;
+	}
+	return ret;
+}
 
 Cursor TextEditor::getNextWord() {
 	// vim appears to use the following method:
@@ -275,6 +283,7 @@ void TextEditor::insert(const std::string& s) {
 	for(size_t i = 0; i < s.size(); i++) if(s[i] == '\n') {
 		insert(s.substr(0, i));
 		std::string suffix = base->operator[](cursor.line).substr(cursor.column);
+		//std::string prefix = getIndentation(cursor.line);
 		base->operator[](cursor.line).erase(cursor.column);
 		base->operator[](cursor.line) += '\n';
 
@@ -293,6 +302,7 @@ void TextEditor::insert(char c) {
 	reAdjustCursor(true);
 	if(c == '\n') {
 		std::string suffix = base->operator[](cursor.line).substr(cursor.column);
+		//std::string prefix = getIndentation(cursor.line);
 		base->operator[](cursor.line).erase(cursor.column);
 		base->operator[](cursor.line) += '\n';
 

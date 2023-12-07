@@ -887,7 +887,7 @@ KC::InsertedChanges KC::parseChanges() {
 			case KEY_DC:
 				ret.rit++;
 				break;
-			case KC::KEY_ESC:
+			case KEY_ESC:
 				break;
 			default:
 				ret.ins.push_back(i);

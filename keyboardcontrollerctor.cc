@@ -188,23 +188,23 @@ KC::KeyboardController() {
 
 	start.addTransition('J', &KC::join, &start);
 
-	start.addTransition(2, [](KC*)->void{ // ctrl+B
+	start.addTransition(CTRLB, [](KC*)->void{ // ctrl+B
 		
 	}, &start);
 
-	start.addTransition(4, [](KC*)->void{ // ctrl+D
+	start.addTransition(CTRLD, [](KC*)->void{ // ctrl+D
 		
 	}, &start);
 
-	start.addTransition(6, [](KC*)->void{ // ctrl+F
+	start.addTransition(CTRLF, [](KC*)->void{ // ctrl+F
 		
 	}, &start);
 
-	start.addTransition(7, [](KC*)->void{ // ctrl+G
+	start.addTransition(CTRLG, [](KC*)->void{ // ctrl+G
 		
 	}, &start);
 
-	start.addTransition(21, [](KC*)->void{ // ctrl+G
+	start.addTransition(CTRLU, [](KC*)->void{ // ctrl+G
 		
 	}, &start);
 }

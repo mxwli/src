@@ -33,6 +33,7 @@ private: // separator here just for helper functions
 	bool advanceCursor(Cursor& c, int lr); // returns whether or not we've hit the beginning
 	Cursor getNextWord();
 	Cursor getPreviousWord();
+	std::string getIndentation(int line); // returns string representing indentation
 public:
 	TextEditor(TextBase* base): base(base), constBase(base), cursor(0,0,0) {
 		cursorHistory.push_back(cursor);
