@@ -283,13 +283,13 @@ void TextEditor::insert(const std::string& s) {
 	for(size_t i = 0; i < s.size(); i++) if(s[i] == '\n') {
 		insert(s.substr(0, i));
 		std::string suffix = base->operator[](cursor.line).substr(cursor.column);
-		//std::string prefix = getIndentation(cursor.line);
+		std::string prefix = getIndentation(cursor.line);
 		base->operator[](cursor.line).erase(cursor.column);
 		base->operator[](cursor.line) += '\n';
 
-		cursor.line++; cursor.column = 0;
+		cursor.line++; cursor.column = prefix.size();
 		base->newLine(cursor.line, 1);
-		base->operator[](cursor.line) = suffix;
+		base->operator[](cursor.line) = prefix+suffix;
 
 		insert(s.substr(i+1));
 		return;
@@ -302,14 +302,13 @@ void TextEditor::insert(char c) {
 	reAdjustCursor(true);
 	if(c == '\n') {
 		std::string suffix = base->operator[](cursor.line).substr(cursor.column);
-		//std::string prefix = getIndentation(cursor.line);
+		std::string prefix = getIndentation(cursor.line);
 		base->operator[](cursor.line).erase(cursor.column);
 		base->operator[](cursor.line) += '\n';
 
-		cursor.line++; cursor.column = 0;
+		cursor.line++; cursor.column = prefix.size();
 		base->newLine(cursor.line, 1);
-		base->operator[](cursor.line) = suffix;
-
+		base->operator[](cursor.line) = prefix+suffix;
 		return;
 	}
 	std::string& cur = base->operator[](cursor.line);

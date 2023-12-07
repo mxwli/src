@@ -192,7 +192,10 @@ private:
 
 	// helper functions
 	void parseCount();
-	struct InsertedChanges{size_t lft, rit; std::string ins;};
+	struct InsertedChanges{
+		std::vector<std::string> lft;
+		size_t rit;
+	};
 	InsertedChanges parseChanges();
 };
 

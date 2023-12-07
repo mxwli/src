@@ -328,8 +328,15 @@ void KC::endAppend() {
 		v->editor.exitInsertMode();
 		while(cnt-->0) {
 			v->editor.moveCursor(0, 1);
-			v->editor.erase(changes.lft, changes.rit);
-			v->editor.insert(changes.ins);
+			v->editor.erase(0, changes.rit);
+			for(const auto& i: changes.lft) {
+				if(i.size() > 0 && i[0] == (char)KEY_BACKSPACE) {
+					v->editor.erase(i.size(), 0);
+				}
+				else {
+					v->editor.insert(i);
+				}
+			}
 			v->editor.moveCursor(0, -1);
 		}
 		v->bottomDisplay = "";
@@ -355,8 +362,15 @@ void KC::endEOLAppend() {
 		v->editor.exitInsertMode();
 		while(cnt-->0) {
 			v->editor.moveCursor(0, 1e9);
-			v->editor.erase(changes.lft, changes.rit);
-			v->editor.insert(changes.ins);
+			v->editor.erase(0, changes.rit);
+			for(const auto& i: changes.lft) {
+				if(i.size() > 0 && i[0] == (char)KEY_BACKSPACE) {
+					v->editor.erase(i.size(), 0);
+				}
+				else {
+					v->editor.insert(i);
+				}
+			}
 			v->editor.moveCursor(0, -1);
 		}
 		v->bottomDisplay = "";
@@ -381,8 +395,15 @@ void KC::endInsert() {
 		VM* v = dynamic_cast<VM*>(m);
 		v->editor.exitInsertMode();
 		while(cnt-->0) {
-			v->editor.erase(changes.lft, changes.rit);
-			v->editor.insert(changes.ins);
+			v->editor.erase(0, changes.rit);
+			for(const auto& i: changes.lft) {
+				if(i.size() > 0 && i[0] == (char)KEY_BACKSPACE) {
+					v->editor.erase(i.size(), 0);
+				}
+				else {
+					v->editor.insert(i);
+				}
+			}
 			v->editor.moveCursor(0, -1);
 		}
 		v->bottomDisplay = "";
@@ -409,8 +430,15 @@ void KC::endBOLInsert() {
 		v->editor.exitInsertMode();
 		while(cnt-->0) {
 			v->editor.moveCursor(0, -1e9);
-			v->editor.erase(changes.lft, changes.rit);
-			v->editor.insert(changes.ins);
+			v->editor.erase(0, changes.rit);
+			for(const auto& i: changes.lft) {
+				if(i.size() > 0 && i[0] == (char)KEY_BACKSPACE) {
+					v->editor.erase(i.size(), 0);
+				}
+				else {
+					v->editor.insert(i);
+				}
+			}
 			v->editor.moveCursor(0, -1);
 		}
 		v->bottomDisplay = "";
@@ -438,8 +466,15 @@ void KC::endNLInsert() {
 		while(cnt-->0) {
 			v->editor.moveCursor(0, 1e9);
 			v->editor.insert('\n');
-			v->editor.erase(changes.lft, changes.rit);
-			v->editor.insert(changes.ins);
+			v->editor.erase(0, changes.rit);
+			for(const auto& i: changes.lft) {
+				if(i.size() > 0 && i[0] == (char)KEY_BACKSPACE) {
+					v->editor.erase(i.size(), 0);
+				}
+				else {
+					v->editor.insert(i);
+				}
+			}
 		}
 		v->editor.moveCursor(0, -1);
 		v->bottomDisplay = "";
@@ -469,8 +504,15 @@ void KC::endPNLInsert() {
 			v->editor.moveCursor(0, -1e9);
 			v->editor.insert('\n');
 			v->editor.moveCursor(-1, 0);
-			v->editor.erase(changes.lft, changes.rit);
-			v->editor.insert(changes.ins);
+			v->editor.erase(0, changes.rit);
+			for(const auto& i: changes.lft) {
+				if(i.size() > 0 && i[0] == (char)KEY_BACKSPACE) {
+					v->editor.erase(i.size(), 0);
+				}
+				else {
+					v->editor.insert(i);
+				}
+			}
 		}
 		v->editor.moveCursor(0, -1);
 		v->bottomDisplay = "";
@@ -495,8 +537,15 @@ void KC::endDelInsert() {
 		VM* v = dynamic_cast<VM*>(m);
 		v->editor.exitInsertMode();
 		v->editor.eraseInLine(cnt);
-		v->editor.erase(changes.lft, changes.rit);
-		v->editor.insert(changes.ins);
+			v->editor.erase(0, changes.rit);
+			for(const auto& i: changes.lft) {
+				if(i.size() > 0 && i[0] == (char)KEY_BACKSPACE) {
+					v->editor.erase(i.size(), 0);
+				}
+				else {
+					v->editor.insert(i);
+				}
+			}
 		v->editor.moveCursor(0, -1);
 		v->bottomDisplay = "";
 	}, true, countBuffer);
@@ -526,8 +575,15 @@ void KC::endDelLineInsert() {
 		v->editor.moveCursor(0, -1e9);
 		v->editor.insert('\n');
 		v->editor.moveCursor(-1, 0);
-		v->editor.erase(changes.lft, changes.rit);
-		v->editor.insert(changes.ins);
+		v->editor.erase(0, changes.rit);
+			for(const auto& i: changes.lft) {
+				if(i.size() > 0 && i[0] == (char)KEY_BACKSPACE) {
+					v->editor.erase(i.size(), 0);
+				}
+				else {
+					v->editor.insert(i);
+				}
+			}
 		v->editor.moveCursor(0, -1);
 		v->bottomDisplay = "";
 	}, true, countBuffer);
@@ -575,8 +631,15 @@ void KC::endReplace() {
 		VM* v = dynamic_cast<VM*>(m);
 		v->editor.exitInsertMode();
 		while(cnt-->0) {
-			v->editor.erase(changes.lft, changes.rit+changes.ins.size());
-			v->editor.insert(changes.ins);
+			v->editor.erase(0, changes.rit);
+			for(const auto& i: changes.lft) {
+				if(i.size() > 0 && i[0] == (char)KEY_BACKSPACE) {
+					v->editor.erase(i.size(), 0);
+				}
+				else {
+					v->editor.insert(i);
+				}
+			}
 		}
 		v->editor.moveCursor(0, -1);
 		v->bottomDisplay = "";
@@ -808,8 +871,15 @@ void KC::endCopyDeleteInsertMotion() {
 		applyMotion(v, c, cnt);
 		v->editor.copyTo(cur, motionIsLinewise(c));
 		v->editor.deleteTo(cur, motionIsLinewise(c), true);
-		v->editor.erase(changes.lft, changes.rit);
-		v->editor.insert(changes.ins);
+		v->editor.erase(0, changes.rit);
+			for(const auto& i: changes.lft) {
+				if(i.size() > 0 && i[0] == (char)KEY_BACKSPACE) {
+					v->editor.erase(i.size(), 0);
+				}
+				else {
+					v->editor.insert(i);
+				}
+			}
 		v->editor.moveCursor(0, -1);
 		v->bottomDisplay = "";
 	}, true, countBuffer);
@@ -877,20 +947,33 @@ void KC::parseCount() {
 }
 
 KC::InsertedChanges KC::parseChanges() {
-	InsertedChanges ret{0, 0, ""};
+	InsertedChanges ret{{""}, 0};
+	bool prvBackspace = false;
 	for(int i: buffer) {
 		switch(i){
 			case KEY_BACKSPACE:
-				if(ret.ins.size()>0) ret.ins.pop_back();
-				else ret.lft++;
-				break;
+			if(prvBackspace) {
+				ret.lft.back().push_back(i);
+			}
+			else {
+				ret.lft.push_back("");
+				ret.lft.back().push_back(i);
+				prvBackspace = true;
+			}
 			case KEY_DC:
 				ret.rit++;
 				break;
 			case KEY_ESC:
 				break;
 			default:
-				ret.ins.push_back(i);
+			if(prvBackspace) {
+				ret.lft.push_back("");
+				ret.lft.back().push_back(i);
+				prvBackspace = false;
+			}
+			else {
+				ret.lft.back().push_back(i);
+			}
 		}
 	}
 	buffer.clear();

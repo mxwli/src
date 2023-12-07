@@ -57,7 +57,7 @@ public:
 
 	// "insert mode" in the context of texteditor merely means to create
 	// a temporary copy to display live edits
-	void enterInsertMode(); 
+	void enterInsertMode();
 	void exitInsertMode();
 	void insert(const std::string& s);
 	void insert(char c);
