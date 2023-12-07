@@ -161,6 +161,9 @@ KC::KeyboardController() {
 	automaton[18].addTransition('y', &KC::copyMotion, &start);
 	for(auto i: motionChars)
 		automaton[18].addTransition(i, &KC::copyMotion, &start);
+	
+	start.addTransition('p', &KC::pasteAfter, &start);
+	start.addTransition('P', &KC::pasteBefore, &start);
 
 	start.addTransition('d', &KC::voidFunction, &automaton[19]);
 	automaton[19].addTransition('d', &KC::copyDeleteMotion, &start);

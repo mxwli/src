@@ -164,6 +164,9 @@ private:
 	void endCopyDeleteInsertMotion(); // im very good at naming
 
 	void join();
+	
+	void pasteBefore();
+	void pasteAfter();
 
 	// helper functions
 	void parseCount();

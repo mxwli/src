@@ -340,9 +340,14 @@ void TextEditor::copyTo(Cursor endPosition, bool linewise) {
 
 void TextEditor::pasteAfter() {
 	if(copyRegisterIsLinewise) {
-		moveCursor(0, 1e9);
-		insert('\n');
+		if(cursor.line+1 == (*constBase).numLines()) {
+			base->newLine(cursor.line+1, 1);
+		}
+		moveCursor(1, -1e9);
 		insert(copyRegister);
+		if(cursor.line+1 == (*constBase).numLines()) {
+			erase(1, 0);
+		}
 	}
 	else {
 		moveCursor(0, 1);
@@ -351,13 +356,7 @@ void TextEditor::pasteAfter() {
 }
 void TextEditor::pasteBefore() {
 	if(copyRegisterIsLinewise) {
-		if(cursor.line == 0) {
-			moveCursor(0, -1e9);
-		}
-		else {
-			moveCursor(-1, 1e9);
-		}
-		insert('\n');
+		moveCursor(0, -1e9);
 		insert(copyRegister);
 	}
 	else {

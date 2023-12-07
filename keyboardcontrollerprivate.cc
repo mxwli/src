@@ -828,6 +828,31 @@ void KC::join() {
 	notifyModel(op);
 }
 
+void KC::pasteBefore() {
+	parseCount();
+	buffer.clear();
+	TextOperation op([](Model* m, int cnt)->void{
+		VM* v = dynamic_cast<VM*>(m);
+		v->base.newSave();
+		while(cnt-->0) {
+			v->editor.pasteBefore();
+		}
+	}, true, countBuffer);
+	notifyModel(op);
+}
+void KC::pasteAfter() {
+	parseCount();
+	buffer.clear();
+	TextOperation op([](Model* m, int cnt)->void{
+		VM* v = dynamic_cast<VM*>(m);
+		v->base.newSave();
+		while(cnt-->0) {
+			v->editor.pasteAfter();
+		}
+	}, true, countBuffer);
+	notifyModel(op);
+}
+
 
 
 void KC::parseCount() {
