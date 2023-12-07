@@ -607,6 +607,10 @@ void KC::eraseKeyAfter() {
 	notifyModel(op);
 }
 void KC::insertKey() {
+	if(!validator.isValidInsert(buffer.back())) {
+		buffer.pop_back();
+		return; // we don't want any strange nasty keys here
+	}
 	int c = buffer.back();
 	TextOperation op([c](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);

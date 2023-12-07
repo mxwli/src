@@ -57,14 +57,17 @@ public:
 // this is just included to make sure no funny business with weird special keys occurs
 class ValidKeyChecker {
 	bool validArr[512];
+	bool validInsert[512];
 	public:
 	ValidKeyChecker() {
 		validArr[KEY_BACKSPACE] = validArr[KEY_DC] = validArr[KEY_ESC] = 1;
-		for(int i = 32; i <= 126; i++) validArr[i] = 1;
+		for(int i = 32; i <= 126; i++) validArr[i] = validInsert[i] = 1;
 		validArr['\t'] = validArr['\n'] = 1;
+		validInsert['\t'] = validInsert['\n'] = 1;
 		validArr[CTRLB] = validArr[CTRLD] = validArr[CTRLF] = validArr[CTRLG] = validArr[CTRLU] = 1;
 	}
 	bool isValid(int c) const {return c < 512 && c >= 0 && validArr[c];}
+	bool isValidInsert(int c) const {return c < 512 && c >= 0 && validInsert[c];}
 };
 
 class KeyboardController : public Controller {

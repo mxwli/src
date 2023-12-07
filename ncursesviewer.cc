@@ -94,8 +94,8 @@ void NCursesViewer::notify(Model* m) {
 	mvaddstr(displayRows, 0, v->getBottomDisplay().c_str());
 
 	// begin drawing
-	findNumLinesToPrint(tb);
 	focusCursor(tb);
+	findNumLinesToPrint(tb);
 
 	size_t row = 0;
 	size_t printRow = cursor->line, printCol = 0;
