@@ -188,6 +188,12 @@ KC::KeyboardController() {
 
 	start.addTransition('J', &KC::join, &start);
 
+	start.addTransition(':', &KC::beginColonCommand, &automaton[22]);
+	automaton[22].setDefault(&KC::appendColonCommand, &automaton[22]);
+	automaton[22].addTransition(KEY_BACKSPACE, &KC::eraseColonCommand, &start);
+	automaton[22].addTransition(KEY_ESC, &KC::defaultFunction, &start);
+	automaton[22].addTransition('\n', &KC::finishColonCommand, &start);
+
 	start.addTransition(CTRLB, [](KC*)->void{ // ctrl+B
 		
 	}, &start);

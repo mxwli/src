@@ -193,6 +193,11 @@ private:
 	void pasteBefore();
 	void pasteAfter();
 
+	void beginColonCommand();
+	void appendColonCommand();
+	void eraseColonCommand();
+	void finishColonCommand();
+
 	// helper functions
 	void parseCount();
 	struct InsertedChanges{

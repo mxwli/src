@@ -1,5 +1,7 @@
 #include <ncurses.h>
 #include <iostream>
+#include <vector>
+#include <string>
 #include "keyboardcontroller.h"
 #include "vm.h"
 
@@ -927,6 +929,158 @@ void KC::pasteAfter() {
 	notifyModel(op);
 }
 
+
+void KC::beginColonCommand() {
+	parseCount(); // just do this to erase count from the buffer
+	buffer.pop_back();
+	automaton[22].addTransition(KEY_BACKSPACE, &KC::eraseColonCommand, &automaton[0]);
+	TextOperation op([](Model* m, int cnt)->void{
+		VM* v = dynamic_cast<VM*>(m);
+		v->bottomDisplay = ":";
+	}, false, countBuffer);
+	notifyModel(op);
+}
+void KC::appendColonCommand() {
+	char c = buffer.back();
+	if(!validator.isValidInsert(c)) {buffer.pop_back(); return;}
+	if(buffer.size() == 1) {
+		automaton[22].addTransition(KEY_BACKSPACE, &KC::eraseColonCommand, &automaton[22]);
+	}
+	TextOperation op([c](Model* m, int cnt)->void{
+		VM* v = dynamic_cast<VM*>(m);
+		v->bottomDisplay.push_back(c);
+	}, false, countBuffer);
+	notifyModel(op);
+}
+void KC::eraseColonCommand() {
+	buffer.pop_back();
+	if(buffer.size() == 1) {
+		automaton[22].addTransition(KEY_BACKSPACE, &KC::eraseColonCommand, &automaton[0]);
+	}
+	TextOperation op([](Model* m, int cnt)->void{
+		VM* v = dynamic_cast<VM*>(m);
+		v->bottomDisplay.pop_back();
+	}, false, countBuffer);
+	notifyModel(op);
+}
+std::vector<std::string> splitAtFirstSpace(const std::string& str) {
+	std::vector<std::string> ret(2);
+	int state = 0; // 0 = no spaces encountered
+	for(auto c: str) {
+		if(state == 0 && (c == ' ' || c == '\t')) state = 1;
+		if(state == 0 && !(c == ' ' || c == '\t')) ret[0].push_back(c);
+		if(state == 1 && !(c == ' ' || c == '\t')) state = 2;
+		if(state == 2) ret[1].push_back(c);
+	}
+	return ret;
+}
+void KC::finishColonCommand() {
+	buffer.pop_back();
+	std::string str = "";
+	size_t start = 0;
+	while(start < buffer.size() && (buffer[start] == ' ' || buffer[start] == '\t')) start++;
+	buffer.erase(buffer.begin(), buffer.begin()+start);
+	while(buffer.size() > 0 && buffer.back() == ' ' || buffer.back() == '\t') buffer.pop_back();
+	for(auto i: buffer) str.push_back(i);
+
+	auto split = splitAtFirstSpace(str);
+	if(split[0] == "w") {
+		if(split[1] == "") {
+			TextOperation op([](Model* m, int cnt)->void{
+				VM* v = dynamic_cast<VM*>(m);
+				v->writeToFile();
+			}, false, countBuffer);
+			notifyModel(op);
+		}
+		else {
+			TextOperation op([split](Model* m, int cnt)->void{
+				VM* v = dynamic_cast<VM*>(m);
+				v->writeToFile(split[1]);
+			}, false, countBuffer);
+			notifyModel(op);
+		}
+	}
+	else if(split[0] == "q") {
+		TextOperation op([](Model* m, int cnt)->void{
+			VM* v = dynamic_cast<VM*>(m);
+			v->attemptQuit();
+		}, false, countBuffer);
+		notifyModel(op);
+	}
+	else if(split[0] == "wq") {
+		if(split[1] == "") {
+			TextOperation op([](Model* m, int cnt)->void{
+				VM* v = dynamic_cast<VM*>(m);
+				v->writeToFile();
+				v->attemptQuit();
+			}, false, countBuffer);
+			notifyModel(op);
+		}
+		else {
+			TextOperation op([split](Model* m, int cnt)->void{
+				VM* v = dynamic_cast<VM*>(m);
+				v->writeToFile(split[1]);
+				v->attemptQuit();
+			}, false, countBuffer);
+			notifyModel(op);
+		}
+	}
+	else if(split[0] == "q!") {
+		TextOperation op([](Model* m, int cnt)->void{
+			VM* v = dynamic_cast<VM*>(m);
+			v->forceQuit();
+		}, false, countBuffer);
+		notifyModel(op);
+	}
+	else if(split[0] == "r") {
+		if(split[1] == "") {
+			TextOperation op([split](Model* m, int cnt)->void{
+				VM* v = dynamic_cast<VM*>(m);
+				v->bottomDisplay = "Error: No file name";
+			}, false, countBuffer);
+			notifyModel(op);
+		}
+		else {
+			TextOperation op([split](Model* m, int cnt)->void{
+				VM* v = dynamic_cast<VM*>(m);
+				v->insertFromFile(split[1]);
+			}, false, countBuffer);
+			notifyModel(op);
+		}
+	}
+	else if(split[0] == "$") {
+		TextOperation op([](Model* m, int cnt)->void{
+			VM* v = dynamic_cast<VM*>(m);
+			v->editor.moveCursor(1e9, 0);
+		}, false, countBuffer);
+		notifyModel(op);
+	}
+	else if(str[0] >= '0' && str[0] <= '9') {
+		parseCount();
+		if(buffer.size() > 0) {
+			TextOperation op([](Model* m, int cnt)->void{
+				VM* v = dynamic_cast<VM*>(m);
+				v->bottomDisplay = "Invalid Range";
+			}, false, countBuffer);
+			notifyModel(op);
+		}
+		else {
+			TextOperation op([](Model* m, int cnt)->void{
+				VM* v = dynamic_cast<VM*>(m);
+				v->editor.setCursor(cnt-1, 0);
+			}, false, countBuffer);
+			notifyModel(op);
+		}
+	}
+	else {
+		TextOperation op([str](Model* m, int cnt)->void{
+			VM* v = dynamic_cast<VM*>(m);
+			v->bottomDisplay = "Not an editor command: " + str;
+		}, false, countBuffer);
+		notifyModel(op);
+	}
+	buffer.clear();
+}
 
 
 void KC::parseCount() {
