@@ -10,14 +10,37 @@ void TextEditor::reAdjustCursor(bool restrictCol)  {
 	if(cursor.line >= constBase->numLines())
 		cursor.line = constBase->numLines()-1;
 	if(cursor.column < 0) cursor.column = 0;
-	if(restrictCol && cursor.column >= (int)(*constBase)[cursor.line].size())
-		cursor.column = (*constBase)[cursor.line].size()-1;
+	if(restrictCol) {
+		if(cursor.column >= (int)(*constBase)[cursor.line].size())
+			cursor.column = (*constBase)[cursor.line].size()-1;
+	}
 }
 
-void TextEditor::moveCursor(int ud, int lr) {
+void TextEditor::moveCursor(int ud, int lr, bool vis) {
 	cursor.line += ud;
 	cursor.column += lr;
+	if(lr != 0) cursor.updateVisuals();
 	reAdjustCursor(lr != 0);
+	if(lr == 0 && vis) {// attempt to preserve visual location
+		size_t visloc = 0;
+		for(size_t i = 0; i < cursor.visColumn && i < (*constBase)[cursor.visLine].size(); i++) {
+			if((*constBase)[cursor.visLine][i] == '\t') {
+				visloc = (visloc+4)/4*4;
+			}
+			else visloc++;
+		}
+		size_t nvisloc = 0;
+		for(size_t i = 0; i < (*constBase)[cursor.line].size(); i++) {
+			if((*constBase)[cursor.line][i] == '\t') {
+				nvisloc = (nvisloc+4)/4*4;
+			}
+			else nvisloc++;
+			if(nvisloc >= visloc) {
+				cursor.column = i+1;
+				break;
+			}
+		}
+	}
 }
 
 void TextEditor::setCursor(int line, int col) {
@@ -217,7 +240,7 @@ void TextEditor::exitInsertMode() {
 void TextEditor::erase(size_t left, size_t right) {
 	reAdjustCursor(true);
 	while(left > 0) {
-		std::string& cur = base->operator[](cursor.line);
+		std::string& cur = (*base)[cursor.line];
 		if(left > (size_t)cursor.column) {
 			cur.erase(cur.begin(), cur.begin()+cursor.column);
 			if(cursor.line > 0) {
@@ -225,7 +248,7 @@ void TextEditor::erase(size_t left, size_t right) {
 				std::string curcopy = cur;
 				base->eraseLine(cursor.line, 1);
 				cursor.line--;
-				std::string& newcur = base->operator[](cursor.line);
+				std::string& newcur = (*base)[cursor.line];
 				cursor.column = newcur.size()-1;
 				newcur.pop_back();
 				newcur += curcopy;
@@ -243,7 +266,7 @@ void TextEditor::erase(size_t left, size_t right) {
 		}
 	}
 	while(right > 0) {
-		std::string& cur = base->operator[](cursor.line);
+		std::string& cur = (*base)[cursor.line];
 		if(cursor.line + 1 < base->numLines() && right + cursor.column >= cur.size()) {
 			int numErased = cur.size()-cursor.column;
 			cur.erase(cursor.column);
@@ -282,36 +305,66 @@ void TextEditor::insert(const std::string& s, bool autoIndent) {
 	reAdjustCursor(true);
 	for(size_t i = 0; i < s.size(); i++) if(s[i] == '\n') {
 		insert(s.substr(0, i));
-		std::string suffix = base->operator[](cursor.line).substr(cursor.column);
-		std::string prefix = autoIndent?getIndentation(cursor.line):"";
-		base->operator[](cursor.line).erase(cursor.column);
-		base->operator[](cursor.line) += '\n';
-
-		cursor.line++; cursor.column = prefix.size();
-		base->newLine(cursor.line, 1);
-		base->operator[](cursor.line) = prefix+suffix;
+		if(autoIndent) {
+			std::string prefix = getIndentation(cursor.line);
+			std::string suffix = (*base)[cursor.line].substr(cursor.column);
+			if(cursor.column < prefix.size()) {
+				suffix.erase(0, prefix.size()-cursor.column);
+				prefix.resize(cursor.column);
+			}
+			(*base)[cursor.line].erase(cursor.column);
+			(*base)[cursor.line] += '\n';
+			cursor.line++; cursor.column = prefix.size();
+			base->newLine(cursor.line, 1);
+			(*base)[cursor.line] = prefix + suffix;
+		}
+		else {
+			std::string suffix = (*base)[cursor.line].substr(cursor.column);
+			(*base)[cursor.line].erase(cursor.column);
+			(*base)[cursor.line] += '\n';
+			cursor.line++; cursor.column = 0;
+			base->newLine(cursor.line, 1);
+			(*base)[cursor.line] = suffix;
+		}
 
 		insert(s.substr(i+1));
 		return;
 	}
-	std::string& cur = base->operator[](cursor.line);
+	std::string& cur = (*base)[cursor.line];
 	cur.insert(cursor.column, s.c_str());
 	moveCursor(0, s.size());
 }
 void TextEditor::insert(char c, bool autoIndent) {
 	reAdjustCursor(true);
 	if(c == '\n') {
-		std::string suffix = base->operator[](cursor.line).substr(cursor.column);
-		std::string prefix = autoIndent?getIndentation(cursor.line):"";
-		base->operator[](cursor.line).erase(cursor.column);
-		base->operator[](cursor.line) += '\n';
-
-		cursor.line++; cursor.column = prefix.size();
-		base->newLine(cursor.line, 1);
-		base->operator[](cursor.line) = prefix+suffix;
+		// for some reason, the way autoindent works is that
+		// if the cursor is past the indentation, it works as expected
+		// if the cursor is before the indentation, then the new line
+		// only receives the indentation before the cursor
+		if(autoIndent) {
+			std::string prefix = getIndentation(cursor.line);
+			std::string suffix = (*base)[cursor.line].substr(cursor.column);
+			if(cursor.column < prefix.size()) {
+				suffix.erase(0, prefix.size()-cursor.column);
+				prefix.resize(cursor.column);
+			}
+			(*base)[cursor.line].erase(cursor.column);
+			(*base)[cursor.line] += '\n';
+			cursor.line++; cursor.column = prefix.size();
+			base->newLine(cursor.line, 1);
+			(*base)[cursor.line] = prefix + suffix;
+		}
+		else {
+			std::string suffix = (*base)[cursor.line].substr(cursor.column);
+			(*base)[cursor.line].erase(cursor.column);
+			(*base)[cursor.line] += '\n';
+			cursor.line++; cursor.column = 0;
+			base->newLine(cursor.line, 1);
+			(*base)[cursor.line] = suffix;
+		}
 		return;
 	}
-	std::string& cur = base->operator[](cursor.line);
+	std::string& cur = (*base)[cursor.line];
 	cur.insert(cur.begin()+cursor.column, c);
 	moveCursor(0, 1);
 }

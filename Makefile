@@ -1,6 +1,6 @@
 EXEC=./vm
 CXX=g++
-CXXFLAGS=-std=c++20 -MMD -Wall -g
+CXXFLAGS=-std=c++20 -MMD -g
 LIB=-lncurses
 SRC=$(wildcard *.cc)
 OBJECTS=$(SRC:.cc=.o)

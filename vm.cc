@@ -14,6 +14,7 @@ void VM::notify(Operation* o) {
 		if(to->isChange()) {
 			setLastChange(*to);
 			lastChangeIsSaved = false;
+			getCursor().updateVisuals();
 		}
 		if(isRecording && to->isRecordable()) {
 			recordings[recordingInto].push_back(*to);

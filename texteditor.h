@@ -9,7 +9,7 @@ class VM;
 #include "textoperation.h"
 
 struct Cursor {
-	int line, column, viewBegin, numLinesLastViewed;
+	int line, visLine, column, visColumn, viewBegin, numLinesLastViewed;
 	auto friend operator<=>(const Cursor& cur, const Cursor& other) {
 		return std::pair<int, int>(cur.line, cur.column)
 			<=> std::pair<int, int>(other.line, other.column);
@@ -18,6 +18,7 @@ struct Cursor {
 		return std::pair<int, int>(cur.line, cur.column)
 			== std::pair<int, int>(other.line, other.column);
 	}
+	void updateVisuals() {visLine = line; visColumn = column;}
 };
 
 class TextEditor {
@@ -41,7 +42,7 @@ public:
 
 	// cursor navigation
 	void reAdjustCursor(bool restrictCol);
-	void moveCursor(int ud, int lr);
+	void moveCursor(int ud, int lr, bool vis = false);
 	void setCursor(int line, int col);
 	Cursor getCursor() {return cursor;}
 	void jumpByWord(int words);

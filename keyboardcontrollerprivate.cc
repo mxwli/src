@@ -31,7 +31,7 @@ void KC::moveUp() {
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
-		v->editor.moveCursor(-cnt, 0);
+		v->editor.moveCursor(-cnt, 0, true);
 	}, false, countBuffer);
 	notifyModel(op);
 }
@@ -40,7 +40,7 @@ void KC::moveDown() {
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
-		v->editor.moveCursor(cnt,0 );
+		v->editor.moveCursor(cnt, 0, true);
 	}, false, countBuffer);
 	notifyModel(op);
 }
@@ -50,7 +50,7 @@ void KC::moveLeft() {
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
-		v->editor.moveCursor(0, -cnt);
+		v->editor.moveCursor(0, -cnt, true);
 	}, false, countBuffer);
 	notifyModel(op);
 }
@@ -59,7 +59,7 @@ void KC::moveRight() {
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
-		v->editor.moveCursor(0, cnt);
+		v->editor.moveCursor(0, cnt, true);
 	}, false, countBuffer);
 	notifyModel(op);
 }
@@ -491,6 +491,7 @@ void KC::beginPNLInsert() {
 		VM* v = dynamic_cast<VM*>(m);
 		v->editor.enterInsertMode();
 		v->editor.moveCursor(0, -1e9);
+		v->editor.jumpToNonWhitespace(false);
 		v->editor.insert('\n');
 		v->editor.moveCursor(-1, 0);
 		v->bottomDisplay = "-- INSERT --";
@@ -504,6 +505,7 @@ void KC::endPNLInsert() {
 		v->editor.exitInsertMode();
 		while(cnt-->0) {
 			v->editor.moveCursor(0, -1e9);
+			v->editor.jumpToNonWhitespace(false);
 			v->editor.insert('\n');
 			v->editor.moveCursor(-1, 0);
 			v->editor.erase(0, changes.rit);
