@@ -278,12 +278,12 @@ void TextEditor::eraseLine(size_t cnt) {
 	base->eraseLine(cursor.line, cnt);
 }
 
-void TextEditor::insert(const std::string& s) {
+void TextEditor::insert(const std::string& s, bool autoIndent) {
 	reAdjustCursor(true);
 	for(size_t i = 0; i < s.size(); i++) if(s[i] == '\n') {
 		insert(s.substr(0, i));
 		std::string suffix = base->operator[](cursor.line).substr(cursor.column);
-		std::string prefix = getIndentation(cursor.line);
+		std::string prefix = autoIndent?getIndentation(cursor.line):"";
 		base->operator[](cursor.line).erase(cursor.column);
 		base->operator[](cursor.line) += '\n';
 
@@ -298,11 +298,11 @@ void TextEditor::insert(const std::string& s) {
 	cur.insert(cursor.column, s.c_str());
 	moveCursor(0, s.size());
 }
-void TextEditor::insert(char c) {
+void TextEditor::insert(char c, bool autoIndent) {
 	reAdjustCursor(true);
 	if(c == '\n') {
 		std::string suffix = base->operator[](cursor.line).substr(cursor.column);
-		std::string prefix = getIndentation(cursor.line);
+		std::string prefix = autoIndent?getIndentation(cursor.line):"";
 		base->operator[](cursor.line).erase(cursor.column);
 		base->operator[](cursor.line) += '\n';
 

@@ -51,14 +51,16 @@ void VM::readFromFile(std::string fileName) {
 
 		char c;
 		while(file >> c) {
-			editor.insert(c);
+			editor.insert(c, false);
 			bytes++;
 			if(c == '\n') lines++;
 		}
 		if(c != '\n') {
-			editor.insert('\n');
 			bottomDisplay += " [noeol]";
 			lines++;
+		}
+		else {
+			editor.erase(1, 0); // erase the last line
 		}
 		// if the last char isn't a newline, we insert one
 
@@ -123,14 +125,14 @@ void VM::insertFromFile(std::string fileName) {
 		char c;
 
 		editor.moveCursor(0, 1e9);
-		editor.insert('\n');
+		editor.insert('\n', false);
 		while(file >> c) {
-			editor.insert(c);
+			editor.insert(c, false);
 			bytes++;
 			if(c == '\n') lines++;
 		}
 		if(c != '\n') {
-			editor.insert('\n');
+			editor.insert('\n', false);
 			bottomDisplay += " [noeol]";
 			lines++;
 		}

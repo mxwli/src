@@ -644,6 +644,7 @@ void KC::endReplace() {
 				}
 				else {
 					v->editor.insert(i);
+					v->editor.erase(0, i.size());
 				}
 			}
 		}
@@ -957,6 +958,7 @@ void KC::eraseColonCommand() {
 	if(buffer.size() == 1) {
 		automaton[22].addTransition(KEY_BACKSPACE, &KC::eraseColonCommand, &automaton[0]);
 	}
+	buffer.pop_back();
 	TextOperation op([](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
 		v->bottomDisplay.pop_back();
@@ -1118,6 +1120,7 @@ KC::InsertedChanges KC::parseChanges() {
 				ret.lft.back().push_back(i);
 				prvBackspace = true;
 			}
+			break;
 			case KEY_DC:
 				ret.rit++;
 				break;

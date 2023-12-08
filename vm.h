@@ -57,6 +57,7 @@ public:
 	void beginRecording(char c) {
 		isRecording = true;
 		recordingInto = c;
+		recordings[c].clear();
 	}
 	void endRecording() {
 		isRecording = false;

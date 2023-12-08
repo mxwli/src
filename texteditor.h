@@ -59,8 +59,8 @@ public:
 	// a temporary copy to display live edits
 	void enterInsertMode();
 	void exitInsertMode();
-	void insert(const std::string& s);
-	void insert(char c);
+	void insert(const std::string& s, bool autoIndent=true);
+	void insert(char c, bool autoIndent=true);
 	void erase(size_t left, size_t right);
 	void eraseInLine(size_t right);
 	void eraseLine(size_t cnt);
