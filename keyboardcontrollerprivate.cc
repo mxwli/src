@@ -1085,6 +1085,72 @@ void KC::finishColonCommand() {
 }
 
 
+void KC::scrollUp() {
+	parseCount();
+	buffer.clear();
+	TextOperation op([](Model* m, int cnt)->void{
+		VM* v = dynamic_cast<VM*>(m);
+		Cursor& c = v->getCursor();
+		while(cnt-->0) {
+			c.line = c.viewBegin+1;
+			c.viewBegin = c.line - c.numLinesLastViewed+1;
+		}
+		v->editor.moveCursor(0, 0);
+	}, false, countBuffer, false);
+	notifyModel(op);
+}
+void KC::scrollDown() {
+	parseCount();
+	buffer.clear();
+	TextOperation op([](Model* m, int cnt)->void{
+		VM* v = dynamic_cast<VM*>(m);
+		Cursor& c = v->getCursor();
+		while(cnt-->0) {
+			c.line = c.viewBegin + c.numLinesLastViewed - 2;
+			c.viewBegin = c.line;
+		}
+		v->editor.moveCursor(0, 0);
+	}, false, countBuffer, false);
+	notifyModel(op);
+}
+void KC::scrollHalfUp() {
+	parseCount();
+	buffer.clear();
+	TextOperation op([](Model* m, int cnt)->void{
+		VM* v = dynamic_cast<VM*>(m);
+		Cursor& c = v->getCursor();
+		while(cnt-->0) {
+			c.line = c.viewBegin + 1;
+			c.viewBegin = c.line-c.numLinesLastViewed/2;
+		}
+		v->editor.moveCursor(0, 0);
+	}, false, countBuffer, false);
+	notifyModel(op);
+}
+void KC::scrollHalfDown() {
+	parseCount();
+	buffer.clear();
+	TextOperation op([](Model* m, int cnt)->void{
+		VM* v = dynamic_cast<VM*>(m);
+		Cursor& c = v->getCursor();
+		while(cnt-->0) {
+			c.line = c.viewBegin + c.numLinesLastViewed - 2;
+			c.viewBegin = c.line-c.numLinesLastViewed/2;
+		}
+		v->editor.moveCursor(0, 0);
+	}, false, countBuffer, false);
+	notifyModel(op);
+}
+void KC::getFileInfo() {
+	buffer.clear();
+	TextOperation op([](Model* m, int cnt)->void{
+		VM* v = dynamic_cast<VM*>(m);
+		v->getFileInfo();
+	}, false, countBuffer, false);
+	notifyModel(op);
+}
+
+
 void KC::parseCount() {
 	if(buffer.size() == 0 || buffer[0] < '0' || buffer[0] > '9') {
 		countBuffer = 1;

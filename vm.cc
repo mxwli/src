@@ -15,7 +15,7 @@ void VM::notify(Operation* o) {
 			setLastChange(*to);
 			lastChangeIsSaved = false;
 		}
-		if(isRecording) {
+		if(isRecording && to->isRecordable()) {
 			recordings[recordingInto].push_back(*to);
 		}
 		(*to)(this);
@@ -41,9 +41,6 @@ void VM::readFromFile(std::string fileName) {
 		std::ifstream file(fileName);
 
 		file >> std::noskipws;
-
-		bottomDisplay = "\""+fileName+"\"";
-		bottomDisplaySuffix = "";
 		base = TextBase();
 		editor = TextEditor(&base);
 		
@@ -55,24 +52,21 @@ void VM::readFromFile(std::string fileName) {
 			bytes++;
 			if(c == '\n') lines++;
 		}
+		// if the last char isn't a newline, we insert one
 		if(c != '\n') {
-			bottomDisplay += " [noeol]";
+			noeol = true;
 			lines++;
 		}
 		else {
 			editor.erase(1, 0); // erase the last line
 		}
-		// if the last char isn't a newline, we insert one
 
-		std::stringstream bytelinecnt;
-		bytelinecnt << lines << "L " << bytes << "B";
-
-		std::string S; std::getline(bytelinecnt, S);
-
-		bottomDisplay += " " + S;
+		newFile = false;
+		getFileInfo();
 	}
 	else {
 		bottomDisplay = fileName + " [New]";
+		newFile = true;
 	}
 }
 
@@ -87,20 +81,17 @@ void VM::writeToFile() {
 		return;
 	}
 	bottomDisplay = fileName;
-	if(!std::filesystem::exists(fileName)) bottomDisplay += " [New]";
+	if(!std::filesystem::exists(fileName)) newFile = true;
 	size_t lines = 0, bytes = 0;
 	std::ofstream fout(fileName);
 	const TextBase& constBase = base;
-	for(size_t i = 0; i < base.numLines(); i++) {
+	for(size_t i = 0; i < constBase.numLines(); i++) {
 		fout << constBase[i];
 		lines++;
 		bytes += constBase[i].size();
 	}
-	std::stringstream bytelinecnt;
-	bytelinecnt << lines << "L " << bytes << "B";
-	std::string S; std::getline(bytelinecnt, S);
-	bottomDisplay += " " + S;
 	lastChangeIsSaved = true;
+	getFileInfo();
 }
 
 void VM::insertFromFile(std::string fileName) {
@@ -145,4 +136,29 @@ void VM::insertFromFile(std::string fileName) {
 
 		bottomDisplay += " " + S;
 	}
+}
+
+void VM::getFileInfo() {
+	size_t lines = 0, bytes = 0;
+	if(fileName != "") {
+		bottomDisplay = "\"" + fileName + "\" ";
+	} else {
+		bottomDisplay = "\"[No Name]\" ";
+	}
+	if(readonly) bottomDisplay += "[readonly]";
+	if(permissionDenied) bottomDisplay += "[Permission Denied]";
+	if(noeol) bottomDisplay += "[noeol]";
+	if(newFile) bottomDisplay += "[New]";
+	if(!lastChangeIsSaved) bottomDisplay += "[Modified]";
+
+	const TextBase& constBase = base;
+	for(size_t i = 0; i < constBase.numLines(); i++) {
+		lines++;
+		bytes += constBase[i].size();
+	}
+
+	std::stringstream bytelinecnt;
+	bytelinecnt << lines << "L " << bytes << "B";
+	std::string S; std::getline(bytelinecnt, S);
+	bottomDisplay += " " + S;
 }

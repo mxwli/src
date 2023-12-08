@@ -198,6 +198,13 @@ private:
 	void eraseColonCommand();
 	void finishColonCommand();
 
+	// window scrolling commands
+	void scrollUp();
+	void scrollDown();
+	void scrollHalfUp();
+	void scrollHalfDown();
+	void getFileInfo();
+
 	// helper functions
 	void parseCount();
 	struct InsertedChanges{

@@ -194,24 +194,10 @@ KC::KeyboardController() {
 	automaton[22].addTransition(KEY_ESC, &KC::defaultFunction, &start);
 	automaton[22].addTransition('\n', &KC::finishColonCommand, &start);
 
-	start.addTransition(CTRLB, [](KC*)->void{ // ctrl+B
-		
-	}, &start);
-
-	start.addTransition(CTRLD, [](KC*)->void{ // ctrl+D
-		
-	}, &start);
-
-	start.addTransition(CTRLF, [](KC*)->void{ // ctrl+F
-		
-	}, &start);
-
-	start.addTransition(CTRLG, [](KC*)->void{ // ctrl+G
-		
-	}, &start);
-
-	start.addTransition(CTRLU, [](KC*)->void{ // ctrl+G
-		
-	}, &start);
+	start.addTransition(CTRLB, &KC::scrollUp, &start);
+	start.addTransition(CTRLD, &KC::scrollHalfDown, &start);
+	start.addTransition(CTRLF, &KC::scrollDown, &start);
+	start.addTransition(CTRLG, &KC::getFileInfo, &start);
+	start.addTransition(CTRLU, &KC::scrollHalfUp, &start);
 }
 

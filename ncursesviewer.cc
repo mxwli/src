@@ -25,6 +25,7 @@ size_t NCursesViewer::rowsRequiredForLine(const std::string& str) const {
 }
 
 void NCursesViewer::focusCursor(const TextBase& tb) {
+	if(cursor->viewBegin < 0) cursor->viewBegin = 0;
 	cursor->viewBegin = std::min(cursor->viewBegin, cursor->line);
 	size_t rowsAvailable = displayRows - std::min(displayRows, rowsRequiredForLine(tb[cursor->line]));
 	size_t setmax = cursor->line;
@@ -123,6 +124,8 @@ void NCursesViewer::notify(Model* m) {
 	}
 	move(printRow, printCol+idxWidth);
 	refresh();
+
+	cursor->numLinesLastViewed = numLinesToPrint;
 }
 
 /*

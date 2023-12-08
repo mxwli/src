@@ -9,7 +9,7 @@ class VM;
 #include "textoperation.h"
 
 struct Cursor {
-	int line, column, viewBegin;
+	int line, column, viewBegin, numLinesLastViewed;
 	auto friend operator<=>(const Cursor& cur, const Cursor& other) {
 		return std::pair<int, int>(cur.line, cur.column)
 			<=> std::pair<int, int>(other.line, other.column);

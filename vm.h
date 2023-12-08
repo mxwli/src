@@ -10,13 +10,22 @@ class VM;
 #include "keyboardcontroller.h"
 
 class VM : public Model {
+	// bottom text
 	std::string bottomDisplay, bottomDisplaySuffix;
+
+	// core components of model
 	TextEditor editor;
 	TextBase base;
 
+	// file handling
 	std::string fileName;
+	bool readonly = false;
+	bool permissionDenied = false;
+	bool noeol = false;
+	bool newFile = true;
 	bool lastChangeIsSaved = true;
 
+	// lastChange & recording handling
 	TextOperation lastChange;
 	std::vector<TextOperation> recordings[512];
 	bool isRecording;
@@ -38,6 +47,7 @@ public:
 	void writeToFile(std::string str);
 	void writeToFile(); // uses last read/write
 	void insertFromFile(std::string fileName);
+	void getFileInfo();
 
 	// editing & bottomDisplay
 	std::string getBottomDisplay() const {return bottomDisplay+bottomDisplaySuffix;}
