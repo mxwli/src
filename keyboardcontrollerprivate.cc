@@ -645,8 +645,8 @@ void KC::endReplace() {
 					v->editor.erase(i.size(), 0);
 				}
 				else {
+					v->editor.eraseInLine(i.size());
 					v->editor.insert(i);
-					v->editor.erase(0, i.size());
 				}
 			}
 		}
@@ -659,7 +659,7 @@ void KC::replaceKey() {
 	int c = buffer.back();
 	TextOperation op([c](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
-		v->editor.erase(0, 1);
+		v->editor.eraseInLine(1);
 		v->editor.insert(c);
 	}, false, 1);
 	notifyModel(op);
@@ -668,11 +668,12 @@ void KC::replaceKey() {
 void KC::replaceKeyWithSave() {
 	parseCount();
 	int c = buffer.back();
+	buffer.clear();
 	TextOperation op([c](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
 		v->base.newSave();
+		v->editor.eraseInLine(cnt);
 		while(cnt-->0) {
-			v->editor.erase(0, 1);
 			v->editor.insert(c);
 		}
 		v->editor.moveCursor(0, -1);

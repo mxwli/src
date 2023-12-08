@@ -289,7 +289,7 @@ void TextEditor::erase(size_t left, size_t right) {
 }
 
 void TextEditor::eraseInLine(size_t right) {
-	std::string& cur = (*base)[cursor.column];
+	std::string& cur = (*base)[cursor.line];
 	if(cursor.column+right+1 > cur.size()) {
 		cur.erase(cursor.column);
 		cur.push_back('\n');
@@ -327,7 +327,7 @@ void TextEditor::insert(const std::string& s, bool autoIndent) {
 			(*base)[cursor.line] = suffix;
 		}
 
-		insert(s.substr(i+1));
+		insert(s.substr(i+1), autoIndent);
 		return;
 	}
 	std::string& cur = (*base)[cursor.line];
@@ -406,7 +406,7 @@ void TextEditor::pasteAfter() {
 			base->newLine(cursor.line+1, 1);
 		}
 		moveCursor(1, -1e9);
-		insert(copyRegister);
+		insert(copyRegister, false);
 		if(cursor.line+1 == (*constBase).numLines()) {
 			erase(1, 0);
 		}
@@ -419,10 +419,10 @@ void TextEditor::pasteAfter() {
 void TextEditor::pasteBefore() {
 	if(copyRegisterIsLinewise) {
 		moveCursor(0, -1e9);
-		insert(copyRegister);
+		insert(copyRegister, false);
 	}
 	else {
-		insert(copyRegister);
+		insert(copyRegister, false);
 	}
 }
 

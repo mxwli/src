@@ -106,16 +106,13 @@ void NCursesViewer::notify(Model* m) {
 			printRow = row;
 			char lastCh = ' ';
 			for(int i2 = 0; i2 < std::min(tb[cursor->line].size(), (size_t)cursor->column+1); i2++) {
-				if(tb[cursor->line][i2] == '\t') printCol = (printCol+4)/4*4;
+				if(tb[cursor->line][i2] == '\t' && i2 < cursor->column) printCol = (printCol+4)/4*4;
 				else printCol++;
 				if(printCol >= displayCols) {
 					printCol = 0;
 					printRow++;
 				}
 				lastCh = tb[cursor->line][i2];
-			}
-			if(lastCh == '\t') {
-				printCol-=3;
 			}
 		}
 		row += rowsRequiredForLine(tb[i+cursor->viewBegin]);
