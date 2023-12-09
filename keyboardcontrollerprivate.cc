@@ -149,6 +149,7 @@ void KC::enterNextSearch() {
 	// if we only have /, then pressing backspace returns to start
 	// this is changed when we enter anything (ie. searchCharTyped is triggered)
 	parseCount();
+	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
 		v->bottomDisplay = "/";
@@ -169,10 +170,11 @@ void KC::searchNextCharTyped() {
 }
 void KC::searchNextCharErased() {
 	buffer.pop_back(); // pop the backspace key
-	if(buffer.size() == 2) {
+	if(buffer.size()) buffer.pop_back();
+	if(buffer.size() == 0) {
 		automaton[16].addTransition(KEY_BACKSPACE, &KC::searchNextCharErased, &automaton[0]);
-		// now that only one character will be in the buffer after this erase,
-		// we change the transition target back to beginning for the next erase
+		// now that the only char left in bottomDisplay is '/', and the buffer is empty,
+		// our next backspace leads to the starting state
 	}
 	TextOperation op([](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
@@ -181,8 +183,7 @@ void KC::searchNextCharErased() {
 	notifyModel(op);
 }
 void KC::finishNextSearch() {
-	buffer.erase(buffer.begin());
-	buffer.pop_back();
+	buffer.pop_back(); // pop the enter key
 	std::string str = "";
 	for(auto i: buffer) str.push_back(i);
 	TextOperation op([str](Model* m, int cnt)->void{
@@ -203,6 +204,7 @@ void KC::enterPrevSearch() {
 	// if we only have /, then pressing backspace returns to start
 	// this is changed when we enter anything (ie. searchCharTyped is triggered)
 	parseCount();
+	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
 		v->bottomDisplay = "?";
@@ -212,7 +214,8 @@ void KC::enterPrevSearch() {
 void KC::searchPrevCharTyped() {
 	if(buffer.size() == 1) {
 		automaton[17].addTransition(KEY_BACKSPACE, &KC::searchPrevCharErased, &automaton[17]);
-		// change the transition target
+		// now that we have characters in the buffer, pressing backspace doesn't
+		// lead to the starting state. It just returns to its own state
 	}
 	char c = buffer.back();
 	TextOperation op([c](Model* m, int cnt)->void{
@@ -223,10 +226,11 @@ void KC::searchPrevCharTyped() {
 }
 void KC::searchPrevCharErased() {
 	buffer.pop_back(); // pop the backspace key
-	if(buffer.size() == 2) {
+	if(buffer.size()) buffer.pop_back();
+	if(buffer.size() == 0) {
 		automaton[17].addTransition(KEY_BACKSPACE, &KC::searchPrevCharErased, &automaton[0]);
-		// now that only one character will be in the buffer after this erase,
-		// we change the transition target back to beginning for the next erase
+		// now that bottomDisplay only shows '/', and
+		// the next erase erases that as well, we return to the insert state
 	}
 	TextOperation op([](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
@@ -235,8 +239,7 @@ void KC::searchPrevCharErased() {
 	notifyModel(op);
 }
 void KC::finishPrevSearch() {
-	buffer.erase(buffer.begin());
-	buffer.pop_back();
+	buffer.pop_back(); // pop the enter key
 	std::string str = "";
 	for(auto i: buffer) str.push_back(i);
 	TextOperation op([str](Model* m, int cnt)->void{
@@ -936,8 +939,9 @@ void KC::pasteAfter() {
 
 void KC::beginColonCommand() {
 	parseCount(); // just do this to erase count from the buffer
-	buffer.pop_back();
+	buffer.pop_back(); // erase the actual colon: it is of no use
 	automaton[22].addTransition(KEY_BACKSPACE, &KC::eraseColonCommand, &automaton[0]);
+	// the next backspace returns to the start state
 	TextOperation op([](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
 		v->bottomDisplay = ":";
@@ -949,6 +953,8 @@ void KC::appendColonCommand() {
 	if(!validator.isValidInsert(c)) {buffer.pop_back(); return;}
 	if(buffer.size() == 1) {
 		automaton[22].addTransition(KEY_BACKSPACE, &KC::eraseColonCommand, &automaton[22]);
+		// now that backspace just erases from the buffer, we don't return
+		// to the beginning state
 	}
 	TextOperation op([c](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
@@ -957,11 +963,12 @@ void KC::appendColonCommand() {
 	notifyModel(op);
 }
 void KC::eraseColonCommand() {
-	buffer.pop_back();
-	if(buffer.size() == 1) {
+	buffer.pop_back(); // pop the backspace
+	if(buffer.size()) buffer.pop_back();
+	if(buffer.size() == 0) {
 		automaton[22].addTransition(KEY_BACKSPACE, &KC::eraseColonCommand, &automaton[0]);
+		// the next backspace erases the ':' from bottomDisplay, exiting the colon state
 	}
-	buffer.pop_back();
 	TextOperation op([](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
 		v->bottomDisplay.pop_back();
@@ -980,7 +987,7 @@ std::vector<std::string> splitAtFirstSpace(const std::string& str) {
 	return ret;
 }
 void KC::finishColonCommand() {
-	buffer.pop_back();
+	buffer.pop_back(); // pop the enter key
 	std::string str = "";
 	size_t start = 0;
 	while(start < buffer.size() && (buffer[start] == ' ' || buffer[start] == '\t')) start++;

@@ -77,7 +77,7 @@ class KeyboardController : public Controller {
 	size_t countBuffer; // buffer for count
 	// scans the buffer for a count and return the count value
 	// additionally removes the count from the buffer
-	bool isRecording;
+	bool isRecording = false;
 	ValidKeyChecker validator;
 public:
 	KeyboardController();
