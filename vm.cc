@@ -4,6 +4,7 @@
 #include <filesystem>
 
 VM::VM(std::string fileName) {
+	if(fileName != "") readFromFile(fileName);
 	quitSignal = false;
 }
 
