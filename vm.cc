@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <filesystem>
 
-VM::VM(): editor(&base), record(this) {
+VM::VM(std::string fileName) {
 	quitSignal = false;
 }
 
@@ -13,7 +13,7 @@ void VM::notify(Operation* o) {
 		if(to->isChange()) {
 			record.setLastChange(*to);
 			lastChangeIsSaved = false;
-			editor.cursor.updateVisuals();
+			editor.getCursor().updateVisuals();
 		}
 		if(record.isRecording() && to->isRecordable()) {
 			record.recordTextOperation(*to);

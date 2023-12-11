@@ -79,7 +79,7 @@ void NCursesViewer::printLine(size_t idx, const std::string& line, size_t atRow)
 }
 
 void NCursesViewer::notify(Model* m) {
-	VM* v = dynamic_cast<VM*>(m);
+	VMVisual* v = dynamic_cast<VMVisual*>(m);
 	if(v == nullptr) return;
 	if(targetWin == nullptr) return;
 	cursor = &(v->getCursor());

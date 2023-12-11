@@ -17,19 +17,15 @@ int main(int argc, char* argv[]) {
 	set_tabsize(4); // the only correct size
 	ESCDELAY = 0;
 	
-	// MVC
-	VM model;
-
 	std::string fileName = "";
-	bool enableEnhancement = false;
+	bool enableEnhancement = true;
 	for(int i = 1; i < argc; i++) {
-		if(std::string(argv[i]) == "-e") enableEnhancement = true;
+		if(std::string(argv[i]) == "-e") enableEnhancement = false;
 		else fileName = std::string(argv[i]);
 	}
-	if(fileName != "") {
-		model.readFromFile(fileName);
-	}
 
+	// MVC
+	VM model(fileName);
 	NCursesViewer view(win);
 	KeyboardController control(enableEnhancement);
 	

@@ -11,7 +11,7 @@ void KC::moveBackByWord() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.jumpByWord(-cnt);
 	}, false, countBuffer);
 	notifyModel(op);
@@ -20,7 +20,7 @@ void KC::moveFrontByWord() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.jumpByWord(cnt);
 	}, false, countBuffer);
 	notifyModel(op);
@@ -30,7 +30,7 @@ void KC::moveUp() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.moveCursor(-cnt, 0, true);
 	}, false, countBuffer);
 	notifyModel(op);
@@ -39,7 +39,7 @@ void KC::moveDown() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.moveCursor(cnt, 0, true);
 	}, false, countBuffer);
 	notifyModel(op);
@@ -49,7 +49,7 @@ void KC::moveLeft() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.moveCursor(0, -cnt, true);
 	}, false, countBuffer);
 	notifyModel(op);
@@ -58,7 +58,7 @@ void KC::moveRight() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.moveCursor(0, cnt, true);
 	}, false, countBuffer);
 	notifyModel(op);
@@ -67,7 +67,7 @@ void KC::moveRight() {
 void KC::moveBeginNonBlank() {
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.moveCursor(0, -1e9);
 		v->editor.jumpToNonWhitespace(false);
 	}, false, 1);
@@ -80,7 +80,7 @@ void KC::handleZero() {
 	}
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.moveCursor(0, -1e9);
 	}, false, 1);
 	notifyModel(op);
@@ -88,7 +88,7 @@ void KC::handleZero() {
 void KC::moveEnd() {
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.moveCursor(0, 1e9);
 	}, false, 1);
 	notifyModel(op);
@@ -100,7 +100,7 @@ void KC::jumpLeft() {
 	buffer.clear();
 	lastJump = c; isRight = false;
 	TextOperation op([c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		while(cnt-->0) v->editor.jumpLeft(c);
 	}, false, countBuffer);
 	notifyModel(op);
@@ -111,7 +111,7 @@ void KC::jumpRight() {
 	buffer.clear();
 	lastJump = c; isRight = true;
 	TextOperation op([c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		while(cnt-->0) v->editor.jumpRight(c);
 	}, false, countBuffer);
 	notifyModel(op);
@@ -125,7 +125,7 @@ void KC::repeatLastJump() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([this](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		while(cnt-->0) {
 			if(isRight) {v->editor.jumpRight(lastJump);}
 			else {v->editor.jumpLeft(lastJump);}
@@ -138,7 +138,7 @@ void KC::nextC() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([this](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.jumpC();
 	}, false, countBuffer);
 	notifyModel(op);
@@ -151,7 +151,7 @@ void KC::enterNextSearch() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->bottomDisplay = "/";
 	}, false, countBuffer);
 	notifyModel(op);
@@ -163,7 +163,7 @@ void KC::searchNextCharTyped() {
 	}
 	char c = buffer.back();
 	TextOperation op([c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->bottomDisplay.push_back(c);
 	}, false, countBuffer);
 	notifyModel(op);
@@ -177,7 +177,7 @@ void KC::searchNextCharErased() {
 		// our next backspace leads to the starting state
 	}
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->bottomDisplay.pop_back();
 	}, false, countBuffer);
 	notifyModel(op);
@@ -187,7 +187,7 @@ void KC::finishNextSearch() {
 	std::string str = "";
 	for(auto i: buffer) str.push_back(i);
 	TextOperation op([str](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->bottomDisplay = "/" + str;
 		bool flag = false;
 		while(cnt-->0) {
@@ -206,7 +206,7 @@ void KC::enterPrevSearch() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->bottomDisplay = "?";
 	}, false, countBuffer);
 	notifyModel(op);
@@ -219,7 +219,7 @@ void KC::searchPrevCharTyped() {
 	}
 	char c = buffer.back();
 	TextOperation op([c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->bottomDisplay.push_back(c);
 	}, false, countBuffer);
 	notifyModel(op);
@@ -233,7 +233,7 @@ void KC::searchPrevCharErased() {
 		// the next erase erases that as well, we return to the insert state
 	}
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->bottomDisplay.pop_back();
 	}, false, countBuffer);
 	notifyModel(op);
@@ -243,7 +243,7 @@ void KC::finishPrevSearch() {
 	std::string str = "";
 	for(auto i: buffer) str.push_back(i);
 	TextOperation op([str](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->bottomDisplay = "?" + str;
 		bool flag = false;
 		while(cnt-->0) {
@@ -260,7 +260,7 @@ void KC::finishPrevSearch() {
 void KC::repeatNextSearch() {
 	parseCount();
 	TextOperation op([this](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		bool flag = false;
 		if(direction) {
 			v->bottomDisplay = "/" + lastSearch;
@@ -282,7 +282,7 @@ void KC::repeatNextSearch() {
 void KC::repeatPrevSearch() {
 	parseCount();
 	TextOperation op([this](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		bool flag = false;
 		if(direction) {
 			v->bottomDisplay = "?" + lastSearch;
@@ -306,7 +306,7 @@ void KC::repeatPrevSearch() {
 void KC::defaultFunction() {
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->bottomDisplay = "";
 	}, false, 1);
 	notifyModel(op);
@@ -319,7 +319,7 @@ void KC::beginAppend() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.enterInsertMode();
 		v->editor.moveCursor(0, 1);
 		v->bottomDisplay = "-- INSERT --";
@@ -329,7 +329,7 @@ void KC::beginAppend() {
 void KC::endAppend() {
 	InsertedChanges changes = parseChanges();
 	TextOperation op([changes](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.exitInsertMode();
 		while(cnt-->0) {
 			v->editor.moveCursor(0, 1);
@@ -353,7 +353,7 @@ void KC::beginEOLAppend() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.enterInsertMode();
 		v->editor.moveCursor(0, 1e9);
 		v->bottomDisplay = "-- INSERT --";
@@ -363,7 +363,7 @@ void KC::beginEOLAppend() {
 void KC::endEOLAppend() {
 	InsertedChanges changes = parseChanges();
 	TextOperation op([changes](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.exitInsertMode();
 		while(cnt-->0) {
 			v->editor.moveCursor(0, 1e9);
@@ -387,7 +387,7 @@ void KC::beginInsert() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.enterInsertMode();
 		v->bottomDisplay = "-- INSERT --";
 	}, false, 1);
@@ -397,7 +397,7 @@ void KC::beginInsert() {
 void KC::endInsert() {
 	InsertedChanges changes = parseChanges();
 	TextOperation op([changes](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.exitInsertMode();
 		while(cnt-->0) {
 			v->editor.erase(0, changes.rit);
@@ -420,7 +420,7 @@ void KC::beginBOLInsert() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.enterInsertMode();
 		v->editor.moveCursor(0, -1e9);
 		v->editor.jumpToNonWhitespace(false);
@@ -431,7 +431,7 @@ void KC::beginBOLInsert() {
 void KC::endBOLInsert() {
 	InsertedChanges changes = parseChanges();
 	TextOperation op([changes](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.exitInsertMode();
 		while(cnt-->0) {
 			v->editor.moveCursor(0, -1e9);
@@ -455,7 +455,7 @@ void KC::beginNLInsert() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.enterInsertMode();
 		v->editor.moveCursor(0, 1e9);
 		v->editor.insert('\n');
@@ -466,7 +466,7 @@ void KC::beginNLInsert() {
 void KC::endNLInsert() {
 	InsertedChanges changes = parseChanges();
 	TextOperation op([changes](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.exitInsertMode();
 		while(cnt-->0) {
 			v->editor.moveCursor(0, 1e9);
@@ -491,7 +491,7 @@ void KC::beginPNLInsert() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.enterInsertMode();
 		v->editor.moveCursor(0, -1e9);
 		v->editor.jumpToNonWhitespace(false);
@@ -504,7 +504,7 @@ void KC::beginPNLInsert() {
 void KC::endPNLInsert() {
 	InsertedChanges changes = parseChanges();
 	TextOperation op([changes](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.exitInsertMode();
 		while(cnt-->0) {
 			v->editor.moveCursor(0, -1e9);
@@ -531,7 +531,7 @@ void KC::beginDelInsert() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.enterInsertMode();
 		v->editor.eraseInLine(cnt);
 		v->bottomDisplay = "-- INSERT --";
@@ -541,7 +541,7 @@ void KC::beginDelInsert() {
 void KC::endDelInsert() {
 	InsertedChanges changes = parseChanges();
 	TextOperation op([changes](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.exitInsertMode();
 		v->editor.eraseInLine(cnt);
 			v->editor.erase(0, changes.rit);
@@ -563,7 +563,7 @@ void KC::beginDelLineInsert() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.enterInsertMode();
 		v->editor.eraseLine(cnt);
 		v->editor.moveCursor(0, -1e9);
@@ -576,7 +576,7 @@ void KC::beginDelLineInsert() {
 void KC::endDelLineInsert() {
 	InsertedChanges changes = parseChanges();
 	TextOperation op([changes](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.exitInsertMode();
 		v->editor.eraseLine(cnt);
 		v->editor.moveCursor(0, -1e9);
@@ -600,7 +600,7 @@ void KC::endDelLineInsert() {
 
 void KC::eraseKeyBefore() {
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.erase(1, 0);
 	}, false, 1);
 	notifyModel(op);
@@ -608,7 +608,7 @@ void KC::eraseKeyBefore() {
 void KC::eraseKeyAfter() {
 	// erase the key after
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.erase(0, 1);
 	}, false, 1);
 	notifyModel(op);
@@ -620,7 +620,7 @@ void KC::insertKey() {
 	}
 	int c = buffer.back();
 	TextOperation op([c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.insert(c);
 	}, false, 1);
 	notifyModel(op);
@@ -630,7 +630,7 @@ void KC::beginReplace() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.enterInsertMode();
 		v->bottomDisplay = "-- REPLACE --";
 	}, false, 1);
@@ -639,7 +639,7 @@ void KC::beginReplace() {
 void KC::endReplace() {
 	InsertedChanges changes = parseChanges();
 	TextOperation op([changes](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.exitInsertMode();
 		while(cnt-->0) {
 			v->editor.erase(0, changes.rit);
@@ -661,7 +661,7 @@ void KC::endReplace() {
 void KC::replaceKey() {
 	int c = buffer.back();
 	TextOperation op([c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.eraseInLine(1);
 		v->editor.insert(c);
 	}, false, 1);
@@ -673,7 +673,7 @@ void KC::replaceKeyWithSave() {
 	int c = buffer.back();
 	buffer.clear();
 	TextOperation op([c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->base.newSave();
 		v->editor.eraseInLine(cnt);
 		while(cnt-->0) {
@@ -688,7 +688,7 @@ void KC::undo() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		while(cnt-->0)
 			v->editor.undo();
 	}, false, 1);
@@ -698,7 +698,7 @@ void KC::undo() {
 void KC::repeatLastChange() {
 	if(buffer[0] < '0' || buffer[0] > '9') {
 		TextOperation op([](Model* m, int cnt)->void{
-			VM* v = dynamic_cast<VM*>(m);
+			VMInternal* v = dynamic_cast<VMInternal*>(m);
 			v->record.repeatLastChange(0);
 		}, false, countBuffer);
 		notifyModel(op);
@@ -706,7 +706,7 @@ void KC::repeatLastChange() {
 	else {
 		parseCount();
 		TextOperation op([](Model* m, int cnt)->void{
-			VM* v = dynamic_cast<VM*>(m);
+			VMInternal* v = dynamic_cast<VMInternal*>(m);
 			v->record.repeatLastChange(cnt);
 		}, false, countBuffer);
 		notifyModel(op);
@@ -734,7 +734,7 @@ void KC::beginRecording() {
 	char c = buffer.back();
 	buffer.clear();
 	TextOperation op([c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->record.beginRecording(c);
 		v->bottomDisplaySuffix = " recording @";
 		v->bottomDisplaySuffix.push_back(c);
@@ -745,7 +745,7 @@ void KC::beginRecording() {
 void KC::endRecording() {
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->record.endRecording();
 		v->bottomDisplaySuffix = "";
 	}, false, 1);
@@ -757,7 +757,7 @@ void KC::playRecording() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		while(cnt-->0) {
 			v->record.playRecording(c);
 		}
@@ -772,7 +772,7 @@ void KC::recognizeAlias() {
 	if(buffer[0] == 'x') buffer = {'d','l'};
 }
 
-void KC::applyMotion(VM* v, char c, int cnt) {
+void KC::applyMotion(VMInternal* v, char c, int cnt) {
 	switch(c) {
 		case 'h':v->editor.moveCursor(0, -cnt);
 		break;
@@ -832,9 +832,9 @@ void KC::copyMotion() {
 	char c = buffer.back();
 	buffer.clear();
 	TextOperation op([this, c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.reAdjustCursor(true);
-		Cursor cur = v->getCursor();
+		Cursor cur = v->editor.getCursor();
 		applyMotion(v, c, cnt);
 		v->editor.copyTo(cur, motionIsLinewise(c));
 		v->editor.setCursor(cur.line, cur.column);
@@ -847,10 +847,10 @@ void KC::copyDeleteMotion() {
 	char c = buffer.back();
 	buffer.clear();
 	TextOperation op([this, c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->base.newSave();
 		v->editor.reAdjustCursor(true);
-		Cursor cur = v->getCursor();
+		Cursor cur = v->editor.getCursor();
 		applyMotion(v, c, cnt);
 		v->editor.copyTo(cur, motionIsLinewise(c));
 		v->editor.deleteTo(cur, motionIsLinewise(c));
@@ -862,11 +862,11 @@ void KC::copyDeleteInsertMotion() {
 	recognizeAlias();
 	char c = buffer.back();
 	TextOperation op([this, c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.reAdjustCursor(true);
 		v->editor.enterInsertMode();
 		v->bottomDisplay = "-- INSERT --";
-		Cursor cur = v->getCursor();
+		Cursor cur = v->editor.getCursor();
 		applyMotion(v, c, cnt);
 		v->editor.copyTo(cur, motionIsLinewise(c));
 		v->editor.deleteTo(cur, motionIsLinewise(c), true);
@@ -878,9 +878,9 @@ void KC::endCopyDeleteInsertMotion() {
 	buffer.erase(buffer.begin(), buffer.begin()+2);
 	InsertedChanges changes = parseChanges();
 	TextOperation op([this, changes, c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->editor.exitInsertMode();
-		Cursor cur = v->getCursor();
+		Cursor cur = v->editor.getCursor();
 		applyMotion(v, c, cnt);
 		v->editor.copyTo(cur, motionIsLinewise(c));
 		v->editor.deleteTo(cur, motionIsLinewise(c), true);
@@ -902,7 +902,7 @@ void KC::join() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->base.newSave();
 		while(cnt-->0) {
 			v->editor.join();
@@ -915,7 +915,7 @@ void KC::pasteBefore() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->base.newSave();
 		while(cnt-->0) {
 			v->editor.pasteBefore();
@@ -927,7 +927,7 @@ void KC::pasteAfter() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->base.newSave();
 		while(cnt-->0) {
 			v->editor.pasteAfter();
@@ -943,7 +943,7 @@ void KC::beginColonCommand() {
 	automaton[22].addTransition(KEY_BACKSPACE, &KC::eraseColonCommand, &automaton[0]);
 	// the next backspace returns to the start state
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->bottomDisplay = ":";
 	}, false, countBuffer);
 	notifyModel(op);
@@ -957,7 +957,7 @@ void KC::appendColonCommand() {
 		// to the beginning state
 	}
 	TextOperation op([c](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->bottomDisplay.push_back(c);
 	}, false, countBuffer);
 	notifyModel(op);
@@ -970,7 +970,7 @@ void KC::eraseColonCommand() {
 		// the next backspace erases the ':' from bottomDisplay, exiting the colon state
 	}
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->bottomDisplay.pop_back();
 	}, false, countBuffer);
 	notifyModel(op);
@@ -999,14 +999,14 @@ void KC::finishColonCommand() {
 	if(split[0] == "w") {
 		if(split[1] == "") {
 			TextOperation op([](Model* m, int cnt)->void{
-				VM* v = dynamic_cast<VM*>(m);
+				VMInternal* v = dynamic_cast<VMInternal*>(m);
 				v->writeToFile();
 			}, false, countBuffer);
 			notifyModel(op);
 		}
 		else {
 			TextOperation op([split](Model* m, int cnt)->void{
-				VM* v = dynamic_cast<VM*>(m);
+				VMInternal* v = dynamic_cast<VMInternal*>(m);
 				v->writeToFile(split[1]);
 			}, false, countBuffer);
 			notifyModel(op);
@@ -1014,7 +1014,7 @@ void KC::finishColonCommand() {
 	}
 	else if(split[0] == "q") {
 		TextOperation op([](Model* m, int cnt)->void{
-			VM* v = dynamic_cast<VM*>(m);
+			VMInternal* v = dynamic_cast<VMInternal*>(m);
 			v->attemptQuit();
 		}, false, countBuffer);
 		notifyModel(op);
@@ -1022,7 +1022,7 @@ void KC::finishColonCommand() {
 	else if(split[0] == "wq") {
 		if(split[1] == "") {
 			TextOperation op([](Model* m, int cnt)->void{
-				VM* v = dynamic_cast<VM*>(m);
+				VMInternal* v = dynamic_cast<VMInternal*>(m);
 				v->writeToFile();
 				v->attemptQuit();
 			}, false, countBuffer);
@@ -1030,7 +1030,7 @@ void KC::finishColonCommand() {
 		}
 		else {
 			TextOperation op([split](Model* m, int cnt)->void{
-				VM* v = dynamic_cast<VM*>(m);
+				VMInternal* v = dynamic_cast<VMInternal*>(m);
 				v->writeToFile(split[1]);
 				v->attemptQuit();
 			}, false, countBuffer);
@@ -1039,7 +1039,7 @@ void KC::finishColonCommand() {
 	}
 	else if(split[0] == "q!") {
 		TextOperation op([](Model* m, int cnt)->void{
-			VM* v = dynamic_cast<VM*>(m);
+			VMInternal* v = dynamic_cast<VMInternal*>(m);
 			v->forceQuit();
 		}, false, countBuffer);
 		notifyModel(op);
@@ -1047,14 +1047,14 @@ void KC::finishColonCommand() {
 	else if(split[0] == "r") {
 		if(split[1] == "") {
 			TextOperation op([split](Model* m, int cnt)->void{
-				VM* v = dynamic_cast<VM*>(m);
+				VMInternal* v = dynamic_cast<VMInternal*>(m);
 				v->bottomDisplay = "Error: No file name";
 			}, false, countBuffer);
 			notifyModel(op);
 		}
 		else {
 			TextOperation op([split](Model* m, int cnt)->void{
-				VM* v = dynamic_cast<VM*>(m);
+				VMInternal* v = dynamic_cast<VMInternal*>(m);
 				v->insertFromFile(split[1]);
 			}, false, countBuffer);
 			notifyModel(op);
@@ -1062,7 +1062,7 @@ void KC::finishColonCommand() {
 	}
 	else if(split[0] == "$") {
 		TextOperation op([](Model* m, int cnt)->void{
-			VM* v = dynamic_cast<VM*>(m);
+			VMInternal* v = dynamic_cast<VMInternal*>(m);
 			v->editor.moveCursor(1e9, 0);
 		}, false, countBuffer);
 		notifyModel(op);
@@ -1071,14 +1071,14 @@ void KC::finishColonCommand() {
 		parseCount();
 		if(buffer.size() > 0) {
 			TextOperation op([](Model* m, int cnt)->void{
-				VM* v = dynamic_cast<VM*>(m);
+				VMInternal* v = dynamic_cast<VMInternal*>(m);
 				v->bottomDisplay = "Invalid Range";
 			}, false, countBuffer);
 			notifyModel(op);
 		}
 		else {
 			TextOperation op([](Model* m, int cnt)->void{
-				VM* v = dynamic_cast<VM*>(m);
+				VMInternal* v = dynamic_cast<VMInternal*>(m);
 				v->editor.setCursor(cnt-1, 0);
 			}, false, countBuffer);
 			notifyModel(op);
@@ -1086,7 +1086,7 @@ void KC::finishColonCommand() {
 	}
 	else {
 		TextOperation op([str](Model* m, int cnt)->void{
-			VM* v = dynamic_cast<VM*>(m);
+			VMInternal* v = dynamic_cast<VMInternal*>(m);
 			v->bottomDisplay = "Not an editor command: " + str;
 		}, false, countBuffer);
 		notifyModel(op);
@@ -1099,8 +1099,8 @@ void KC::scrollUp() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
-		Cursor& c = v->getCursor();
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
+		Cursor& c = v->editor.getCursor();
 		while(cnt-->0) {
 			c.line = c.viewBegin+1;
 			c.viewBegin = c.line - c.numLinesLastViewed+1;
@@ -1113,8 +1113,8 @@ void KC::scrollDown() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
-		Cursor& c = v->getCursor();
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
+		Cursor& c = v->editor.getCursor();
 		while(cnt-->0) {
 			c.line = c.viewBegin + c.numLinesLastViewed - 2;
 			c.viewBegin = c.line;
@@ -1127,8 +1127,8 @@ void KC::scrollHalfUp() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
-		Cursor& c = v->getCursor();
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
+		Cursor& c = v->editor.getCursor();
 		while(cnt-->0) {
 			c.line = c.viewBegin + 1;
 			c.viewBegin = c.line-c.numLinesLastViewed/2;
@@ -1141,8 +1141,8 @@ void KC::scrollHalfDown() {
 	parseCount();
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
-		Cursor& c = v->getCursor();
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
+		Cursor& c = v->editor.getCursor();
 		while(cnt-->0) {
 			c.line = c.viewBegin + c.numLinesLastViewed - 2;
 			c.viewBegin = c.line-c.numLinesLastViewed/2;
@@ -1154,7 +1154,7 @@ void KC::scrollHalfDown() {
 void KC::getFileInfo() {
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
-		VM* v = dynamic_cast<VM*>(m);
+		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->getFileInfo();
 	}, false, countBuffer, false);
 	notifyModel(op);

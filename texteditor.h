@@ -29,7 +29,6 @@ class TextEditor {
 	bool copyRegisterIsLinewise = false;
 	Cursor cursor, insertTo;
 	bool isInInsertMode = false;
-	friend class VM;
 private: // separator here just for helper functions
 	bool advanceCursor(Cursor& c, int lr); // returns whether or not we've hit the beginning
 	Cursor getNextWord();
@@ -44,7 +43,8 @@ public:
 	void reAdjustCursor(bool restrictCol);
 	void moveCursor(int ud, int lr, bool vis = false);
 	void setCursor(int line, int col);
-	Cursor getCursor() {return cursor;}
+	Cursor& getCursor() {return cursor;}
+	const Cursor& getCursor() const {return cursor;}
 	void jumpByWord(int words);
 	void jumpToNonWhitespace(bool linewise);
 	void jumpRight(char c);

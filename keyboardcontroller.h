@@ -19,6 +19,7 @@ class KeyboardController;
 #include "textoperation.h"
 #include "texteditor.h"
 #include "ncurses.h"
+#include "vm.h"
 
 class AutomatonNode {
 	struct AutomatonEdge {
@@ -180,7 +181,7 @@ private:
 	void playRecording();
 
 	// range text modification operations (eg. cc/dd/yy)
-	void applyMotion(VM* v, char c, int cnt);
+	void applyMotion(VMInternal* v, char c, int cnt);
 	// to only be used by the range modification functions
 	void recognizeAlias();
 	void copyMotion();
