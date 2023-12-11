@@ -17,10 +17,11 @@ void TextEditor::reAdjustCursor(bool restrictCol)  {
 }
 
 void TextEditor::moveCursor(int ud, int lr, bool vis) {
+	reAdjustCursor(lr != 0);
 	cursor.line += ud;
 	cursor.column += lr;
-	if(lr != 0) cursor.updateVisuals();
 	reAdjustCursor(lr != 0);
+	if(lr != 0) cursor.updateVisuals();
 	if(lr == 0 && vis) {// attempt to preserve visual location
 		size_t visloc = 0;
 		for(size_t i = 0; i < cursor.visColumn && i < (*constBase)[cursor.visLine].size(); i++) {
@@ -49,7 +50,7 @@ void TextEditor::setCursor(int line, int col) {
 	reAdjustCursor(true);
 }
 
-bool TextEditor::advanceCursor(Cursor& c, int lr) {
+bool TextEditor::advanceCursor(Cursor& c, int lr) { // returns whether or not we've hit the end
 	if(c.line < 0) c.line = 0;
 	if(c.line >= constBase->numLines()) c.line = constBase->numLines()-1;
 	if(c.column < 0) c.column = 0;
@@ -183,14 +184,113 @@ void TextEditor::jumpLeft(char c) {
 		cursor = old;
 	}
 }
-
+std::string isolateFlatC(const std::string& line) {
+	std::string linecpy = line;
+	size_t start = 0;
+	while(start < linecpy.size() && (linecpy[start] == ' ' || linecpy[start] == '\t')) start++;
+	linecpy.erase(linecpy.begin(), linecpy.begin()+start);
+	while(linecpy.size()>0 && (linecpy.back() == ' ' || linecpy.back() == '\t')) linecpy.pop_back();
+	auto match = [](const std::string& s, const std::string& p)->bool{return s.substr(0, p.size()) == p;};
+	std::vector<std::string> lookfor = {"#ifdef", "#if", "#else", "#elif", "#endif"};
+	for(auto& i: lookfor) if(match(linecpy, i)) return i;
+	return "";
+}
+bool isNewOpening(const std::string& line, const std::string& pattern) {
+	auto match = isolateFlatC(line);
+	if(pattern == "#endif") return match == pattern;
+	else return match == "#if" || match == "#ifdef";
+}
+bool isClosing(const std::string& line, const std::string& pattern) {
+	auto match = isolateFlatC(line);
+	if(pattern == "#endif") return match == "#if" || match == "#ifdef";
+	else return match == "#endif";
+}
+bool flatCMatches(const std::string& line, const std::string& pattern) {
+	auto match = isolateFlatC(line);
+	if(match == "") return false;
+	if(pattern == "#if" || pattern == "#ifdef" || pattern == "#elif") {
+		if(match == "#if" || match == "#ifdef") return false;
+		else return true;
+	}
+	if(pattern == "#else") {
+		if(match == "#endif") return true;
+		else return false;
+	}
+	if(pattern == "#endif") {
+		return match == "#if" || match == "#ifdef";
+	}
+	return false;
+}
+std::string isolateC(const std::string& line, size_t position) { // helper function for jumpC
+	if(position < 0 || position >= (int)line.size()) return ""; // found nothing
+	if(line[position] == '{') return "{";
+	if(line[position] == '}') return "}";
+	if(line[position] == '[') return "[";
+	if(line[position] == ']') return "]";
+	if(line[position] == '(') return "(";
+	if(line[position] == ')') return ")";
+	if(position > 0 && line[position-1] == '/' && line[position] == '*') return "/*";
+	if(position+1 < (int)line.size() && line[position] == '*' && line[position+1] == '/') return "*/";
+	return "";
+}
+int CMatches(const std::string& line, const std::string& pattern, size_t idx) { // helper function for jumpC
+	// returns -1 if closing braces are found
+	// returns 1 if new opening is found
+	// returns 0 if nothing is found
+		auto match = isolateC(line, idx);
+		if(match == "") return 0;
+		if(match == pattern) return -1;
+		if((match == "{" && pattern == "}") || 
+			(match == "(" && pattern == ")") ||
+			(match == "[" && pattern == "]") ||
+			(match == "}" && pattern == "{") || 
+			(match == ")" && pattern == "(") ||
+			(match == "]" && pattern == "[") ||
+			(match == "/*" && pattern == "*/") ||
+			(match == "*/" && pattern == "/*")) return 1;
+		return 0;
+}
 void TextEditor::jumpC() {
 	reAdjustCursor(true);
 	// we're looking for:
 	// ({[]})
 	// /* */
 	// #if, #ifdef, #else, #elif, #endif
-	//TODO
+	std::string C = isolateC((*constBase)[cursor.line], cursor.column);
+	if(C != "") {
+		int dir = (C == "(" || C == "{" || C == "[" || C == "/*")? (int)C.size():(0-(int)C.size());
+		Cursor tmp = cursor;
+		int accum = 1;
+		while(accum>0) {
+			bool flag = advanceCursor(tmp, dir);
+			accum -= CMatches((*constBase)[tmp.line], C, tmp.column);
+			if(flag) break;
+		}
+		if(CMatches((*constBase)[tmp.line], C, tmp.column) == 1) setCursor(tmp.line, tmp.column);
+	}
+	else {
+		std::string flatC = isolateFlatC((*constBase)[cursor.line]);
+		if(flatC == "") return;
+		int dir = (flatC != "#endif")? 1:-1;
+		Cursor tmp = cursor;
+		tmp.column = 0;
+		int accum = 0;
+		while(tmp.line+dir<constBase->numLines() && tmp.line+dir>=0) {
+			tmp.line += dir;
+			if(isNewOpening((*constBase)[tmp.line], flatC)) {
+				accum++;
+			}
+			if(accum == 0) {
+				//std::cout << (*constBase)[tmp.line] << " " << flatC << " " << flatCMatches((*constBase)[tmp.line], flatC) << "\n";
+				if(flatCMatches((*constBase)[tmp.line], flatC)) break;
+			}
+			else if(isClosing((*constBase)[tmp.line], flatC)) accum--;
+		}
+		if(accum == 0 && flatCMatches((*constBase)[tmp.line], flatC)) {
+			setCursor(tmp.line, tmp.column);
+			jumpToNonWhitespace(false);
+		}
+	}
 }
 
 
