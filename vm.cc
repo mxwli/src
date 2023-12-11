@@ -3,8 +3,7 @@
 #include <iomanip>
 #include <filesystem>
 
-VM::VM(): editor(&base), lastChange([](Model*, int cnt)->void{}, false, 1) {
-	isRecording = false; recordingInto = 0;
+VM::VM(): editor(&base), record(this) {
 	quitSignal = false;
 }
 
@@ -12,12 +11,12 @@ void VM::notify(Operation* o) {
 	TextOperation* to = dynamic_cast<TextOperation*>(o);
 	if(to != nullptr) {
 		if(to->isChange()) {
-			setLastChange(*to);
+			record.setLastChange(*to);
 			lastChangeIsSaved = false;
-			getCursor().updateVisuals();
+			editor.cursor.updateVisuals();
 		}
-		if(isRecording && to->isRecordable()) {
-			recordings[recordingInto].push_back(*to);
+		if(record.isRecording() && to->isRecordable()) {
+			record.recordTextOperation(*to);
 		}
 		(*to)(this);
 		notifyViewers();

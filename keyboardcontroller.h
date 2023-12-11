@@ -80,7 +80,7 @@ class KeyboardController : public Controller {
 	bool isRecording = false;
 	ValidKeyChecker validator;
 public:
-	KeyboardController();
+	KeyboardController(bool enableEnhancement = true);
 	void handleKeystroke(int keystroke) {
 		if(!validator.isValid(keystroke)) return;
 		buffer.push_back(keystroke);

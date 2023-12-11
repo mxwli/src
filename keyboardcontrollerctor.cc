@@ -5,7 +5,7 @@
 
 using KC = KeyboardController;
 
-KC::KeyboardController() {
+KC::KeyboardController(bool enableEnhancement) {
 	/*
 	the plan:
 	nearly every state that transitions back to start clears the buffer.
@@ -105,24 +105,26 @@ KC::KeyboardController() {
 	automaton[11].addTransition(KEY_DC, &KC::defaultFunction, &start);
 	automaton[11].addTransition(KEY_ESC, &KC::defaultFunction, &start);
 
-	start.addTransition('q', &KC::qPressed, &automaton[12]);
-	for(char c = 'a'; c <= 'z'; c++)
-		automaton[12].addTransition(c, &KC::beginRecording, &start);
-	for(char c = 'A'; c <= 'Z'; c++)
-		automaton[12].addTransition(c, &KC::beginRecording, &start);
-	for(char c = '0'; c <= '9'; c++)
-		automaton[12].addTransition(c, &KC::beginRecording, &start);
-	automaton[12].addTransition('\"', &KC::beginRecording, &start);
-	automaton[12].setDefault(&KC::exitQ, &start);
+	if(enableEnhancement) {
+		start.addTransition('q', &KC::qPressed, &automaton[12]);
+		for(char c = 'a'; c <= 'z'; c++)
+			automaton[12].addTransition(c, &KC::beginRecording, &start);
+		for(char c = 'A'; c <= 'Z'; c++)
+			automaton[12].addTransition(c, &KC::beginRecording, &start);
+		for(char c = '0'; c <= '9'; c++)
+			automaton[12].addTransition(c, &KC::beginRecording, &start);
+		automaton[12].addTransition('\"', &KC::beginRecording, &start);
+		automaton[12].setDefault(&KC::exitQ, &start);
 
-	start.addTransition('@', &KC::voidFunction, &automaton[13]);
-	for(char c = 'a'; c <= 'z'; c++)
-		automaton[13].addTransition(c, &KC::playRecording, &start);
-	for(char c = 'A'; c <= 'Z'; c++)
-		automaton[13].addTransition(c, &KC::playRecording, &start);
-	for(char c = '0'; c <= '9'; c++)
-		automaton[13].addTransition(c, &KC::playRecording, &start);
-	automaton[13].addTransition('\"', &KC::playRecording, &start);
+		start.addTransition('@', &KC::voidFunction, &automaton[13]);
+		for(char c = 'a'; c <= 'z'; c++)
+			automaton[13].addTransition(c, &KC::playRecording, &start);
+		for(char c = 'A'; c <= 'Z'; c++)
+			automaton[13].addTransition(c, &KC::playRecording, &start);
+		for(char c = '0'; c <= '9'; c++)
+			automaton[13].addTransition(c, &KC::playRecording, &start);
+		automaton[13].addTransition('\"', &KC::playRecording, &start);
+	}
 
 	start.addTransition('f', &KC::voidFunction, &automaton[14]);
 	automaton[14].setDefault(&KC::jumpRight, &start);

@@ -699,7 +699,7 @@ void KC::repeatLastChange() {
 	if(buffer[0] < '0' || buffer[0] > '9') {
 		TextOperation op([](Model* m, int cnt)->void{
 			VM* v = dynamic_cast<VM*>(m);
-			v->repeatLastChange(0);
+			v->record.repeatLastChange(0);
 		}, false, countBuffer);
 		notifyModel(op);
 	}
@@ -707,7 +707,7 @@ void KC::repeatLastChange() {
 		parseCount();
 		TextOperation op([](Model* m, int cnt)->void{
 			VM* v = dynamic_cast<VM*>(m);
-			v->repeatLastChange(cnt);
+			v->record.repeatLastChange(cnt);
 		}, false, countBuffer);
 		notifyModel(op);
 	}
@@ -735,7 +735,7 @@ void KC::beginRecording() {
 	buffer.clear();
 	TextOperation op([c](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
-		v->beginRecording(c);
+		v->record.beginRecording(c);
 		v->bottomDisplaySuffix = " recording @";
 		v->bottomDisplaySuffix.push_back(c);
 	}, false, 1);
@@ -746,7 +746,7 @@ void KC::endRecording() {
 	buffer.clear();
 	TextOperation op([](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
-		v->endRecording();
+		v->record.endRecording();
 		v->bottomDisplaySuffix = "";
 	}, false, 1);
 	isRecording = false;
@@ -759,7 +759,7 @@ void KC::playRecording() {
 	TextOperation op([c](Model* m, int cnt)->void{
 		VM* v = dynamic_cast<VM*>(m);
 		while(cnt-->0) {
-			v->playRecording(c);
+			v->record.playRecording(c);
 		}
 	}, false, countBuffer);
 	notifyModel(op);

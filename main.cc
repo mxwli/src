@@ -19,13 +19,19 @@ int main(int argc, char* argv[]) {
 	
 	// MVC
 	VM model;
-	if(argc > 1) {
-		model.readFromFile(argv[1]);
+
+	std::string fileName = "";
+	bool enableEnhancement = false;
+	for(int i = 1; i < argc; i++) {
+		if(std::string(argv[i]) == "-e") enableEnhancement = true;
+		else fileName = std::string(argv[i]);
 	}
-	
+	if(fileName != "") {
+		model.readFromFile(fileName);
+	}
 
 	NCursesViewer view(win);
-	KeyboardController control;
+	KeyboardController control(enableEnhancement);
 	
 	control.setModel(&model);
 	model.addView(&view);

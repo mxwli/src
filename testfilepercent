@@ -1,0 +1,36 @@
+
+#include <iostream>
+
+using namespace std;
+
+#ifdef MAKEMAIN
+#if
+#endif
+namespace CC {
+	void f(int x, int y) {
+		cout << x << " " << y*y << "\n";
+		/*
+			haslkdfjalskdfja
+			adsjlkfajsdklf
+			faldfjlskdfl
+			{}{}
+		*/
+	}
+	void g(int x, int y, int z) {
+		f(x*y, z);
+		f(x, y*z);
+		// asdfasdfasdf
+	}
+}
+
+int main(int argc, char* argv[]) {
+	CC::f(1, 2);
+	CC::g(2, 2, 2);
+}
+#else
+#if
+#endif
+int main() {
+	cout << "NO\n";
+}
+#endif
