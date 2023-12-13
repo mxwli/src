@@ -321,6 +321,17 @@ bool TextEditor::findPrevOccurence(std::string str) {
 }
 
 
+void TextEditor::saveCursor() {
+	cursorHistory.push_back(cursor);
+}
+void TextEditor::rollbackCursor() {
+	if(cursorHistory.size()>0) {
+		cursor = cursorHistory.back();
+		cursorHistory.pop_back();
+	}
+}
+
+
 void TextEditor::enterInsertMode() {
 	assert(!isInInsertMode);
 	insertTo = cursor;
@@ -334,6 +345,7 @@ void TextEditor::exitInsertMode() {
 	base->newSave();
 	if(isInInsertMode)
 		setCursor(insertTo.line, insertTo.column);
+	saveCursor();
 	isInInsertMode = false;
 }
 
@@ -471,7 +483,8 @@ void TextEditor::insert(char c, bool autoIndent) {
 
 void TextEditor::undo() {
 	base->rollback(1);
-	reAdjustCursor(true);
+	rollbackCursor();
+	//reAdjustCursor(true);
 }
 
 

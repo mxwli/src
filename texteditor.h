@@ -55,6 +55,9 @@ public:
 	bool findNextOccurence(std::string str);
 	bool findPrevOccurence(std::string str);
 	// returns whether or not an occurence was found
+	void saveCursor();
+	void rollbackCursor();
+
 
 	// "insert mode" in the context of texteditor merely means to create
 	// a temporary copy to display live edits

@@ -675,6 +675,7 @@ void KC::replaceKeyWithSave() {
 	TextOperation op([c](Model* m, int cnt)->void{
 		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->base.newSave();
+		v->editor.saveCursor();
 		v->editor.eraseInLine(cnt);
 		while(cnt-->0) {
 			v->editor.insert(c);
@@ -849,6 +850,7 @@ void KC::copyDeleteMotion() {
 	TextOperation op([this, c](Model* m, int cnt)->void{
 		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->base.newSave();
+		v->editor.saveCursor();
 		v->editor.reAdjustCursor(true);
 		Cursor cur = v->editor.getCursor();
 		applyMotion(v, c, cnt);
@@ -904,6 +906,7 @@ void KC::join() {
 	TextOperation op([](Model* m, int cnt)->void{
 		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->base.newSave();
+		v->editor.saveCursor();
 		while(cnt-->0) {
 			v->editor.join();
 		}
@@ -917,6 +920,7 @@ void KC::pasteBefore() {
 	TextOperation op([](Model* m, int cnt)->void{
 		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->base.newSave();
+		v->editor.saveCursor();
 		while(cnt-->0) {
 			v->editor.pasteBefore();
 		}
@@ -929,6 +933,7 @@ void KC::pasteAfter() {
 	TextOperation op([](Model* m, int cnt)->void{
 		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		v->base.newSave();
+		v->editor.saveCursor();
 		while(cnt-->0) {
 			v->editor.pasteAfter();
 		}
@@ -1130,8 +1135,8 @@ void KC::scrollHalfUp() {
 		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		Cursor& c = v->editor.getCursor();
 		while(cnt-->0) {
-			c.line = c.viewBegin + 1;
-			c.viewBegin = c.line-c.numLinesLastViewed/2;
+			c.line = c.line-c.numLinesLastViewed/2+1;
+			c.viewBegin = c.viewBegin-c.numLinesLastViewed/2+1;
 		}
 		v->editor.moveCursor(0, 0);
 	}, false, countBuffer, false);
@@ -1144,8 +1149,8 @@ void KC::scrollHalfDown() {
 		VMInternal* v = dynamic_cast<VMInternal*>(m);
 		Cursor& c = v->editor.getCursor();
 		while(cnt-->0) {
-			c.line = c.viewBegin + c.numLinesLastViewed - 2;
-			c.viewBegin = c.line-c.numLinesLastViewed/2;
+			c.line = c.line + c.numLinesLastViewed/2-1;
+			c.viewBegin = c.viewBegin + c.numLinesLastViewed/2-1;
 		}
 		v->editor.moveCursor(0, 0);
 	}, false, countBuffer, false);

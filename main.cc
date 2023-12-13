@@ -9,13 +9,6 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-	WINDOW* win = nullptr;
-	win = initscr();// ncurses initialization
-	cbreak(); // get character-at-a-time input
-	noecho(); // do not echo typed characters
-	keypad(stdscr, TRUE); // enable special characters
-	set_tabsize(4); // the only correct size
-	ESCDELAY = 0;
 	
 	std::string fileName = "";
 	bool enableEnhancement = true;
@@ -26,7 +19,7 @@ int main(int argc, char* argv[]) {
 
 	// MVC
 	VM model(fileName);
-	NCursesViewer view(win);
+	NCursesViewer view;
 	KeyboardController control(enableEnhancement);
 	
 	control.setModel(&model);
@@ -37,6 +30,4 @@ int main(int argc, char* argv[]) {
 	while(!model.hasQuitSignal()) {
 		control.handleKeystroke(getch());
 	}
-	
-	endwin();
 }

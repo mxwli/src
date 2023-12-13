@@ -12,7 +12,17 @@ class NCursesViewer : public View {
 	size_t displayRows = 0, displayCols = 0, numTotalLines = 0, idxWidth = 0, numLinesToPrint = 0;
 	Cursor* cursor = 0;
 public:
-	NCursesViewer(WINDOW* win): targetWin(win) {}
+	NCursesViewer() {
+		targetWin = initscr();// ncurses initialization
+		cbreak(); // get character-at-a-time input
+		noecho(); // do not echo typed characters
+		keypad(stdscr, TRUE); // enable special characters
+		set_tabsize(4); // the only correct size
+		ESCDELAY = 0;
+	}
+	~NCursesViewer() {
+		endwin();
+	}
 	void notify(Model* m) override;
 private:
 	// helper functions

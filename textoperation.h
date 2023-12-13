@@ -11,7 +11,6 @@ class TextOperation : public Operation {
 	bool change;
 	bool recordable;
 	int count;
-	friend TextOperation operator+(TextOperation a, TextOperation b);
 public:
 	//TextOperation(): func(nullptr), change(false), count(0) {}
 	TextOperation(std::function<void(Model*, int cnt)> func, bool change, int c):

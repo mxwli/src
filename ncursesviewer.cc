@@ -117,7 +117,9 @@ void NCursesViewer::notify(Model* m) {
 		}
 		row += rowsRequiredForLine(tb[i+cursor->viewBegin]);
 	}
+	size_t extra = 0;
 	while(row+1 < displayRows) {
+		extra++;
 		if(cursor->viewBegin+numLinesToPrint < numTotalLines)
 			mvaddch(row, idxWidth, '@');
 		else
@@ -127,5 +129,5 @@ void NCursesViewer::notify(Model* m) {
 	move(printRow, printCol+idxWidth);
 	refresh();
 
-	cursor->numLinesLastViewed = numLinesToPrint;
+	cursor->numLinesLastViewed = numLinesToPrint+extra;
 }
