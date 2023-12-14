@@ -53,6 +53,7 @@ void VM::readFromFile(std::string fileName) {
 			bytes++;
 			if(c == '\n') lines++;
 		}
+		editor.setCursor(0, 0);
 		// if the last char isn't a newline, we insert one
 		if(c != '\n') {
 			noeol = true;
